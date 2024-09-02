@@ -134,7 +134,7 @@ class DatabaseHelper {
 
   Future<List<Pessoa>> getPessoas(String tipo) async {
     final db = await database;
-    final response = await db.query('pessoa', where: 'tipo = ?', whereArgs: [tipo]);
+    final response = await db.query('pessoa', where: 'tipo = ?', orderBy: 'nome', whereArgs: [tipo]);
     return response.map((pessoa) => Pessoa.fromMap(pessoa)).toList();
   }
 

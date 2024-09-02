@@ -60,6 +60,7 @@ class _ClientesPageState extends State<ClientesPage> {
 
   Future<void> _loadVendas() async {
     final vendasResponse = await db.getVendasByDate(data: _selectedDate, tipo: 'cliente');
+    final clientes = await db.getPessoas('cliente');
 
     for (var produto in widget.produtosDto) {
       ProdutoHistorico produtoHistorico = await db.getProdutoHistorico(idProduto: produto.id, data: _selectedDate);
@@ -67,6 +68,21 @@ class _ClientesPageState extends State<ClientesPage> {
     }
 
     Map<String, LinhaVendaDto> vendasMap = {};
+
+    for (var cliente in clientes) {
+      vendasMap[cliente.nome] = LinhaVendaDto(
+        idPessoa: cliente.id,
+        nomePessoa: cliente.nome,
+        idPimenta: _idsProdutosMap["Pimenta"]!,
+        quantidadePimenta: 0,
+        idQuiabo: _idsProdutosMap["Quiabo"]!,
+        quantidadeQuiabo: 0,
+        idMaxixe: _idsProdutosMap["Maxixe"]!,
+        quantidadeMaxixe: 0,
+        idJilo: _idsProdutosMap["Jiló"]!,
+        quantidadeJilo: 0,
+      );
+    }
 
     for (var venda in vendasResponse) {
       vendasMap[venda.pessoa!.nome] = LinhaVendaDto(
@@ -122,13 +138,51 @@ class _ClientesPageState extends State<ClientesPage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(12.0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
                 formattedDate,
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              // Botão para criar novo usuario
+              FloatingActionButton(
+                child: const Icon(Icons.add),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (BuildContext context) {
+                      final TextEditingController controller = TextEditingController();
+                      return AlertDialog(
+                        title: const Text('Adicionar Cliente'),
+                        content: TextField(
+                          controller: controller,
+                          decoration: const InputDecoration(labelText: 'Nome'),
+                        ),
+                        actions: <Widget>[
+                          TextButton(
+                            child: const Text('Cancelar'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          ElevatedButton(
+                            child: const Text('Salvar'),
+                            onPressed: () {
+                              db.insertPessoa(controller.text, 'cliente');
+                              Navigator.of(context).pop();
+                              setState(() {
+                                _loadVendas();
+                              });
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
               ElevatedButton(
                 onPressed: () {
@@ -196,7 +250,7 @@ class _ClientesPageState extends State<ClientesPage> {
                   context: context,
                   barrierDismissible: false,
                   builder: (BuildContext context) {
-                    if (idProduto != null && idPessoa == null){
+                    if (idProduto != null && idPessoa == null) {
                       controller.text = conteudo.split("\n")[1].split(" ")[0];
                       return AlertDialog(
                         title: const Text('Editar preço'),
