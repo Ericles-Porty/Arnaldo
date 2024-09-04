@@ -1,16 +1,10 @@
-import 'package:flutter/cupertino.dart';
-
 class ProdutoHistorico {
   final int id;
   final int idProduto;
   final double valor;
   final String data;
 
-  ProdutoHistorico(
-      {required this.id,
-      required this.idProduto,
-      required this.valor,
-      required this.data});
+  ProdutoHistorico({required this.id, required this.idProduto, required this.valor, required this.data});
 
   Map<String, dynamic> toMap() {
     return {

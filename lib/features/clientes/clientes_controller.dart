@@ -8,9 +8,10 @@ class ClientesController {
 
   List<Pessoa> get clientes => _clientes;
 
-  Future<void> fetchClientes() async {
+  Future<List<Pessoa>> fetchClientes() async {
     final DatabaseHelper db = Modular.get<DatabaseHelper>();
     final List<Pessoa> clientes = await db.getPessoas(PessoaType.cliente.name);
     _clientes = clientes;
+    return clientes;
   }
 }

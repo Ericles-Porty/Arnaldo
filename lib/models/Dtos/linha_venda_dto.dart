@@ -30,7 +30,7 @@ class LinhaVendaDto {
     this.idVendaJilo,
     required this.quantidadeJilo,
   });
-  
+
   factory LinhaVendaDto.fromMap(Map<String, dynamic> map) {
     return LinhaVendaDto(
       idPessoa: map['id_pessoa'],

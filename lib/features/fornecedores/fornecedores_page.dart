@@ -1,25 +1,24 @@
 import 'package:arnaldo/core/database_helper.dart';
-import 'package:arnaldo/core/enums/pessoa_type.dart';
-import 'package:arnaldo/features/clientes/clientes_controller.dart';
+import 'package:arnaldo/features/fornecedores/fornecedores_controller.dart';
 import 'package:arnaldo/models/pessoa.dart';
 import 'package:arnaldo/widgets/linha_pessoa.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-class ClientesPage extends StatefulWidget {
-  const ClientesPage({super.key});
+class FornecedoresPage extends StatefulWidget {
+  const FornecedoresPage({super.key});
 
   @override
-  State<ClientesPage> createState() => _ClientesPageState();
+  State<FornecedoresPage> createState() => _FornecedoresPageState();
 }
 
-class _ClientesPageState extends State<ClientesPage> {
-  late ClientesController _controller;
+class _FornecedoresPageState extends State<FornecedoresPage> {
+  late FornecedoresController _controller;
 
   @override
   void initState() {
     super.initState();
-    _controller = Modular.get<ClientesController>();
+    _controller = Modular.get<FornecedoresController>();
   }
 
   @override
@@ -27,12 +26,12 @@ class _ClientesPageState extends State<ClientesPage> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Clientes', style: TextStyle(color: Colors.white, fontSize: 32)),
+        title: const Text('Fornecedores', style: TextStyle(color: Colors.white, fontSize: 32)),
         elevation: 0,
         backgroundColor: Theme.of(context).colorScheme.primary,
       ),
       body: FutureBuilder(
-        future: _controller.fetchClientes(),
+        future: _controller.fetchFornecedores(),
         builder: (context, AsyncSnapshot<List<Pessoa>> snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -47,12 +46,12 @@ class _ClientesPageState extends State<ClientesPage> {
                     child: const Padding(
                       padding: EdgeInsets.all(8.0),
                       child: Text(
-                        'Adicionar Cliente',
+                        'Adicionar Fornecedor',
                         style: TextStyle(fontSize: 24),
                       ),
                     ),
                     onPressed: () async {
-                      await _showDialogAdicionarCliente(context);
+                      await _showDialogAdicionarFornecedor(context);
                       setState(() {});
                     },
                   ),
@@ -61,8 +60,8 @@ class _ClientesPageState extends State<ClientesPage> {
                     child: ListView.builder(
                       itemCount: snapshot.data!.length,
                       itemBuilder: (context, index) {
-                        final Pessoa cliente = snapshot.data![index];
-                        return LinhaPessoa(pessoa: cliente);
+                        final Pessoa fornecedor = snapshot.data![index];
+                        return LinhaPessoa(pessoa: fornecedor);
                       },
                     ),
                   ),
@@ -75,14 +74,14 @@ class _ClientesPageState extends State<ClientesPage> {
     );
   }
 
-  Future<dynamic> _showDialogAdicionarCliente(BuildContext context) {
+  Future<dynamic> _showDialogAdicionarFornecedor(BuildContext context) {
     return showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         final TextEditingController controller = TextEditingController();
         return AlertDialog(
-          title: const Text('Adicionar Cliente'),
+          title: const Text('Adicionar Fornecedor'),
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(labelText: 'Nome'),
@@ -98,7 +97,7 @@ class _ClientesPageState extends State<ClientesPage> {
               child: const Text('Salvar'),
               onPressed: () async {
                 final db = Modular.get<DatabaseHelper>();
-                db.insertPessoa(controller.text, PessoaType.cliente.name);
+                db.insertPessoa(controller.text, 'fornecedor');
                 Navigator.of(context).pop();
               },
             ),

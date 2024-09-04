@@ -1,6 +1,5 @@
 import 'package:arnaldo/core/database_helper.dart';
-import 'package:arnaldo/models/Dtos/produto_dto.dart';
-import 'package:arnaldo/models/produto_historico.dart';
+import 'package:arnaldo/features/home/widgets/botao_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -14,28 +13,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
-  Future<List<ProdutoDto>> _loadProdutos() async {
-    final List<ProdutoDto> produtosDto = [];
-    final produtos = await widget.db.getProdutos();
-    for (var produto in produtos) {
-      ProdutoHistorico produtoHistorico = await widget.db.getProdutoHistorico(idProduto: produto.id);
-      produtosDto.add(ProdutoDto(id: produto.id, nome: produto.nome, valor: produtoHistorico.valor));
-    }
-    return produtosDto;
-  }
-
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
-    double size = screenSize.width * 0.15;
+    double size = screenSize.width * 0.3;
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -88,103 +69,3 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
-class BotaoMenu extends StatelessWidget {
-  const BotaoMenu({
-    super.key,
-    required this.size,
-    required this.texto,
-    required this.rota,
-    required this.icone,
-  });
-
-  final String texto;
-  final IconData icone;
-  final String rota;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        shadowColor: Colors.lightGreen,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-      ),
-      child: SizedBox(
-        width: size,
-        height: size,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icone, size: 48),
-            FittedBox(
-              child: Text(
-                texto,
-                style: const TextStyle(fontSize: 48),
-              ),
-            ),
-          ],
-        ),
-      ),
-      onPressed: () {
-        Modular.to.pushNamed(rota);
-      },
-    );
-  }
-}
-/*@override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Arnaldo', style: TextStyle(color: Colors.white)),
-        elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
-      body: _selectedIndex == 0
-          ? FutureBuilder(
-              future: _loadProdutos(),
-              builder: (context, AsyncSnapshot<List<ProdutoDto>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Erro: ${snapshot.error}'));
-                } else {
-                  return ClientesPage(produtosDto: snapshot.data!);
-                }
-              },
-            )
-          : null,
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            label: 'Vendas',
-            icon: Icon(Icons.attach_money),
-          ),
-          BottomNavigationBarItem(
-            label: 'Compras',
-            icon: Icon(Icons.shopping_cart),
-          ),
-          BottomNavigationBarItem(
-            label: 'Produtos',
-            icon: Icon(Icons.inventory),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Clientes',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Fornecedores',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.report),
-            label: 'Relatório',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-      ),
-    );
-  }*/

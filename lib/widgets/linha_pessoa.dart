@@ -1,42 +1,44 @@
 import 'package:arnaldo/core/database_helper.dart';
+import 'package:arnaldo/core/enums/pessoa_type.dart';
+import 'package:arnaldo/core/enums/rota.dart';
 import 'package:arnaldo/models/pessoa.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-class ClienteController {
-  ClienteController({required Pessoa cliente}) : cliente = ValueNotifier<Pessoa>(cliente);
-  final ValueNotifier<Pessoa> cliente;
+class PessoaController {
+  PessoaController({required Pessoa pessoa}) : pessoa = ValueNotifier<Pessoa>(pessoa);
+  final ValueNotifier<Pessoa> pessoa;
 
-  Future<void> fetchCliente() async {
+  Future<void> fetchPessoa() async {
     final db = Modular.get<DatabaseHelper>();
-    cliente.value = await db.getPessoa(cliente.value.id);
+    pessoa.value = await db.getPessoa(pessoa.value.id);
   }
 }
 
-class LinhaCliente extends StatefulWidget {
-  const LinhaCliente({super.key, required this.cliente});
+class LinhaPessoa extends StatefulWidget {
+  const LinhaPessoa({super.key, required this.pessoa});
 
-  final Pessoa cliente;
+  final Pessoa pessoa;
 
   @override
-  State<LinhaCliente> createState() => _LinhaClienteState();
+  State<LinhaPessoa> createState() => _LinhaPessoaState();
 }
 
-class _LinhaClienteState extends State<LinhaCliente> {
-  late ClienteController controller;
+class _LinhaPessoaState extends State<LinhaPessoa> {
+  late PessoaController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = ClienteController(cliente: widget.cliente);
-    controller.cliente.addListener(() {
+    controller = PessoaController(pessoa: widget.pessoa);
+    controller.pessoa.addListener(() {
       setState(() {});
     });
   }
 
   @override
   void dispose() {
-    controller.cliente.removeListener(() {
+    controller.pessoa.removeListener(() {
       setState(() {});
     });
     super.dispose();
@@ -45,15 +47,22 @@ class _LinhaClienteState extends State<LinhaCliente> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<Pessoa>(
-        valueListenable: controller.cliente,
-        builder: (context, cliente, child) {
+        valueListenable: controller.pessoa,
+        builder: (context, pessoa, child) {
           return Column(
             children: [
               Container(
                 decoration: BoxDecoration(
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).shadowColor,
+                      blurRadius: 0.1,
+                      offset: const Offset(3, 1),
+                    ),
+                  ],
                   border: Border.all(color: Theme.of(context).primaryColor, width: 1),
                   borderRadius: BorderRadius.circular(16),
-                  color: cliente.ativo ? Theme.of(context).scaffoldBackgroundColor : Theme.of(context).disabledColor,
+                  color: Theme.of(context).scaffoldBackgroundColor,
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
@@ -64,12 +73,12 @@ class _LinhaClienteState extends State<LinhaCliente> {
                         alignment: Alignment.centerLeft,
                         fit: BoxFit.scaleDown,
                         child: Text(
-                          cliente.nome,
+                          pessoa.nome,
                           textAlign: TextAlign.start,
                           style: TextStyle(
-                            color: cliente.ativo ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
+                            color: pessoa.ativo ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
                             fontSize: 42,
-                            decoration: cliente.ativo ? TextDecoration.none : TextDecoration.lineThrough,
+                            decoration: pessoa.ativo ? TextDecoration.none : TextDecoration.lineThrough,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -84,17 +93,17 @@ class _LinhaClienteState extends State<LinhaCliente> {
                           IconButton(
                             iconSize: 42,
                             icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () async => await _showDialogEditarCliente(context, cliente),
+                            onPressed: () async => await _showDialogEditarPessoa(context, pessoa),
                           ),
                           const SizedBox(width: 24),
                           IconButton(
                             iconSize: 42,
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () async => await _showDialogApagarCliente(context, cliente),
+                            onPressed: () async => await _showDialogApagarPessoa(context, pessoa),
                           ),
                           const SizedBox(width: 24),
                           Switch(
-                            value: cliente.ativo,
+                            value: pessoa.ativo,
                             onChanged: (value) async => await _onToggle(value),
                           ),
                         ],
@@ -111,17 +120,17 @@ class _LinhaClienteState extends State<LinhaCliente> {
 
   Future<void> _onToggle(bool value) async {
     final db = Modular.get<DatabaseHelper>();
-    await db.togglePessoa(widget.cliente.id, value);
-    await controller.fetchCliente();
+    await db.togglePessoa(widget.pessoa.id, value);
+    await controller.fetchPessoa();
   }
 
-  Future<dynamic> _showDialogApagarCliente(BuildContext context, Pessoa cliente) {
+  Future<dynamic> _showDialogApagarPessoa(BuildContext context, Pessoa pessoa) {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Apagar cliente ${cliente.nome}'),
-          content: Text('Deseja realmente apagar o cliente ${cliente.nome}?'),
+          title: Text('Apagar pessoa ${pessoa.nome}'),
+          content: Text('Deseja realmente apagar o pessoa ${pessoa.nome}?'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancelar'),
@@ -133,10 +142,15 @@ class _LinhaClienteState extends State<LinhaCliente> {
               child: const Text('Apagar'),
               onPressed: () async {
                 final db = Modular.get<DatabaseHelper>();
-                await db.deletePessoa(cliente.id);
+                await db.deletePessoa(pessoa.id);
                 Navigator.of(context).pop();
+                Rota rota = pessoa.tipo == PessoaType.cliente.name
+                    ? Rota.clientes
+                    : pessoa.tipo == PessoaType.fornecedor.name
+                        ? Rota.fornecedores
+                        : Rota.home;
                 Modular.to.pop();
-                Modular.to.pushNamed('/clientes/');
+                Modular.to.pushNamed('/${rota.name}/');
               },
             ),
           ],
@@ -145,13 +159,13 @@ class _LinhaClienteState extends State<LinhaCliente> {
     );
   }
 
-  Future<dynamic> _showDialogEditarCliente(BuildContext context, Pessoa cliente) {
+  Future<dynamic> _showDialogEditarPessoa(BuildContext context, Pessoa pessoa) {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
-        final TextEditingController textController = TextEditingController(text: cliente.nome);
+        final TextEditingController textController = TextEditingController(text: pessoa.nome);
         return AlertDialog(
-          title: Text('Editar cliente ${cliente.nome}'),
+          title: Text('Editar pessoa ${pessoa.nome}'),
           content: TextField(
             controller: textController,
             decoration: const InputDecoration(labelText: 'Nome'),
@@ -167,8 +181,8 @@ class _LinhaClienteState extends State<LinhaCliente> {
               child: const Text('Salvar'),
               onPressed: () async {
                 final db = Modular.get<DatabaseHelper>();
-                await db.updatePessoa(cliente.id, textController.text);
-                await controller.fetchCliente();
+                await db.updatePessoa(pessoa.id, textController.text);
+                await controller.fetchPessoa();
                 Navigator.of(context).pop();
               },
             ),

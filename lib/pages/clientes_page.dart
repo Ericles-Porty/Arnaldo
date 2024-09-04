@@ -335,9 +335,13 @@ class _ClientesPageState extends State<ClientesPage> {
           width: celulaWidth,
           height: 60,
           onTap: () {
-            showDialogEditarPreco(context: context, idProduto: _idsProdutosMap['Pimenta']!, setState: () async {
-              await _loadVendas();
-            }, dataSelecionada: _selectedDate);
+            showDialogEditarPreco(
+                context: context,
+                idProduto: _idsProdutosMap['Pimenta']!,
+                setState: () async {
+                  await _loadVendas();
+                },
+                dataSelecionada: _selectedDate);
           },
         ),
         _buildCelula(

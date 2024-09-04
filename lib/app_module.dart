@@ -14,4 +14,3 @@ class AppModule extends Module {
     r.module('/', module: HomeModule());
   }
 }
-

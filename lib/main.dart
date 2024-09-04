@@ -12,6 +12,7 @@ Future<void> resetDatabase() async {
   print(path);
   await deleteDatabase(path);
 }
+
 void main() async {
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
@@ -26,7 +27,7 @@ void main() async {
   runApp(
     ModularApp(
       module: AppModule(),
-      child: AppWidget(),
+      child: const AppWidget(),
     ),
   );
 }
