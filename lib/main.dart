@@ -1,31 +1,32 @@
-import 'package:arnaldo/pages/main_page.dart';
+import 'dart:io';
+
+import 'package:arnaldo/app_module.dart';
+import 'package:arnaldo/app_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
-void main() {
-  runApp(const MyApp());
+Future<void> resetDatabase() async {
+  String path = join(await getDatabasesPath(), 'arnaldo.db');
+  print(path);
+  await deleteDatabase(path);
 }
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Arnaldo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreen),
-        useMaterial3: true,
-      ),
-      localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [
-        Locale('pt', 'BR'), // Português Brasil
-      ],
-      home: const MainPage(),
-    );
+void main() async {
+  if (Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
   }
+
+  WidgetsFlutterBinding.ensureInitialized();
+  //await resetDatabase();
+
+  setPrintResolver((text) => print(text));
+
+  runApp(
+    ModularApp(
+      module: AppModule(),
+      child: AppWidget(),
+    ),
+  );
 }

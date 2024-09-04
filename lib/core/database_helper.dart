@@ -1,11 +1,10 @@
 import 'dart:io';
 
-import 'package:arnaldo/models/Dtos/linha_venda_dto.dart';
+import 'package:arnaldo/core/utils.dart';
 import 'package:arnaldo/models/Produto.dart';
 import 'package:arnaldo/models/pessoa.dart';
 import 'package:arnaldo/models/produto_historico.dart';
 import 'package:arnaldo/models/venda.dart';
-import 'package:arnaldo/utils.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -28,7 +27,8 @@ class DatabaseHelper {
     return path;
   }
 
-  Future<void> copyDatabase() async {    final dbPath = await getDatabasePath();
+  Future<void> copyDatabase() async {
+    final dbPath = await getDatabasePath();
     final file = File(dbPath);
     final directory = await getApplicationDocumentsDirectory();
     final newPath = '${directory.path}/arnaldo/arnaldo_backup.db';
@@ -72,21 +72,10 @@ class DatabaseHelper {
       CREATE TABLE pessoa(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT,
-        tipo TEXT
+        tipo TEXT,
+        ativo INTEGER DEFAULT 1
       )
     ''');
-
-    await db.insert('pessoa', {'nome': 'João', 'tipo': 'cliente'});
-    await db.insert('pessoa', {'nome': 'Maria', 'tipo': 'cliente'});
-    await db.insert('pessoa', {'nome': 'José', 'tipo': 'cliente'});
-    await db.insert('pessoa', {'nome': 'Pedro', 'tipo': 'cliente'});
-    await db.insert('pessoa', {'nome': 'Ana', 'tipo': 'cliente'});
-
-    await db.insert('pessoa', {'nome': 'João', 'tipo': 'fornecedor'});
-    await db.insert('pessoa', {'nome': 'Maria', 'tipo': 'fornecedor'});
-    await db.insert('pessoa', {'nome': 'José', 'tipo': 'fornecedor'});
-    await db.insert('pessoa', {'nome': 'Pedro', 'tipo': 'fornecedor'});
-    await db.insert('pessoa', {'nome': 'Ana', 'tipo': 'fornecedor'});
 
     await db.execute('''
       CREATE TABLE produto_historico(
@@ -98,11 +87,10 @@ class DatabaseHelper {
       )
     ''');
 
-    await db.insert('produto_historico', {'id_produto': 1, 'valor': 10.0, 'data': '2024-01-01'});
-    await db.insert('produto_historico', {'id_produto': 2, 'valor': 20.0, 'data': '2024-01-01'});
-    await db.insert('produto_historico', {'id_produto': 3, 'valor': 30.0, 'data': '2024-01-01'});
-    await db.insert('produto_historico', {'id_produto': 4, 'valor': 40.0, 'data': '2024-01-01'});
-
+    await db.insert('produto_historico', {'id_produto': 1, 'valor': 0.0, 'data': '2024-01-01'});
+    await db.insert('produto_historico', {'id_produto': 2, 'valor': 0.0, 'data': '2024-01-01'});
+    await db.insert('produto_historico', {'id_produto': 3, 'valor': 0.0, 'data': '2024-01-01'});
+    await db.insert('produto_historico', {'id_produto': 4, 'valor': 0.0, 'data': '2024-01-01'});
 
     await db.execute('''
       CREATE TABLE venda(
@@ -117,12 +105,6 @@ class DatabaseHelper {
         FOREIGN KEY (id_pessoa) REFERENCES pessoa (id)
       )
     ''');
-
-    await db.insert('venda', {'id_produto_historico': 1, 'id_pessoa': 1, 'quantidade': 1.0, 'preco': 10.0, 'valor': 10.0, 'data': '2024-08-31'});
-    await db.insert('venda', {'id_produto_historico': 2, 'id_pessoa': 2, 'quantidade': 2.0, 'preco': 20.0, 'valor': 40.0, 'data': '2024-08-31'});
-    await db.insert('venda', {'id_produto_historico': 3, 'id_pessoa': 3, 'quantidade': 3.0, 'preco': 30.0, 'valor': 90.0, 'data': '2024-08-31'});
-    await db.insert('venda', {'id_produto_historico': 4, 'id_pessoa': 4, 'quantidade': 4.0, 'preco': 40.0, 'valor': 160.0, 'data': '2024-08-31'});
-
   }
 
   /// Pessoa
@@ -143,14 +125,19 @@ class DatabaseHelper {
     return await db.insert('pessoa', {'nome': nome, 'tipo': tipo});
   }
 
-  Future<int> updatePessoa(int id, String nome, String tipo) async {
+  Future<int> updatePessoa(int id, String nome) async {
     final db = await database;
-    return await db.update('pessoa', {'nome': nome, 'tipo': tipo}, where: 'id = ?', whereArgs: [id]);
+    return await db.update('pessoa', {'nome': nome}, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<int> deletePessoa(int id) async {
     final db = await database;
     return await db.delete('pessoa', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> togglePessoa(int id, bool ativo) async {
+    final db = await database;
+    return await db.update('pessoa', {'ativo': ativo ? 1 : 0}, where: 'id = ?', whereArgs: [id]);
   }
 
   /// Produto
@@ -187,7 +174,7 @@ class DatabaseHelper {
 
     var query = 'SELECT * FROM produto_historico WHERE id_produto = ?';
     if (data != null) query += ' AND data <= ?';
-    query += ' ORDER BY data DESC LIMIT 1';
+    query += ' ORDER BY data DESC, id DESC LIMIT 1';
 
     final response = await db.rawQuery(query, data != null ? [idProduto, getFormattedDate(data)] : [idProduto]);
 
@@ -200,6 +187,12 @@ class DatabaseHelper {
 
   Future<int> insertProdutoHistorico(int idProduto, double valor, DateTime data) async {
     final db = await database;
+    // primeiro verifica se já existe um registro para a data informada
+    final response = await db.query('produto_historico', where: 'id_produto = ? AND data = ?', whereArgs: [idProduto, getFormattedDate(data)]);
+
+    if (response.isNotEmpty) {
+      return await db.update('produto_historico', {'valor': valor}, where: 'id = ?', whereArgs: [response.first['id']]);
+    }
 
     return await db.insert('produto_historico', {
       'id_produto': idProduto,
@@ -220,8 +213,7 @@ class DatabaseHelper {
 
   /// Venda
 
-
-  Future<List<Venda>> getVendasByDate({required DateTime data, required String tipo}) async{
+  Future<List<Venda>> getVendasByDate({required DateTime data, required String tipo}) async {
     final db = await database;
 
     const vendasByDateQuery = '''
@@ -229,6 +221,7 @@ class DatabaseHelper {
         v.*,
         P.nome as pessoa_nome,
         P.tipo as pessoa_tipo,
+        P.ativo as pessoa_ativo,
         Pr.id as produto_id,
         PR.nome as produto_nome,
         PR.tipo as produto_tipo
@@ -242,7 +235,7 @@ class DatabaseHelper {
     List<Map<String, dynamic>> vendasResponse = await db.rawQuery(vendasByDateQuery, [getFormattedDate(data), tipo]);
 
     return vendasResponse.map((venda) {
-      final pessoa = Pessoa(id: venda['id_pessoa'], nome: venda['pessoa_nome'], tipo: venda['pessoa_tipo']);
+      final pessoa = Pessoa(id: venda['id_pessoa'], nome: venda['pessoa_nome'], tipo: venda['pessoa_tipo'], ativo: venda['pessoa_ativo']);
       final produto = Produto(id: venda['produto_id'], nome: venda['produto_nome'], tipo: venda['produto_tipo']);
 
       return Venda(

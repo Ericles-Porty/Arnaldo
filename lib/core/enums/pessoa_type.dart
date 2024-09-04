@@ -1,0 +1,4 @@
+enum PessoaType {
+  cliente,
+  fornecedor,
+}

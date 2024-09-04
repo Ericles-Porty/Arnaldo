@@ -1,4 +1,4 @@
-import 'package:arnaldo/database_helper.dart';
+import 'package:arnaldo/core/database_helper.dart';
 import 'package:arnaldo/models/Dtos/produto_dto.dart';
 import 'package:arnaldo/models/Produto.dart';
 import 'package:arnaldo/models/produto_historico.dart';

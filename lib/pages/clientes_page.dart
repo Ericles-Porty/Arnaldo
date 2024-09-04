@@ -1,7 +1,8 @@
-import 'package:arnaldo/database_helper.dart';
+import 'package:arnaldo/core/database_helper.dart';
 import 'package:arnaldo/models/Dtos/linha_venda_dto.dart';
 import 'package:arnaldo/models/Dtos/produto_dto.dart';
 import 'package:arnaldo/models/produto_historico.dart';
+import 'package:arnaldo/widgets/celula.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -52,9 +53,12 @@ class _ClientesPageState extends State<ClientesPage> {
 
     if (picked != null && picked != _selectedDate) {
       await _loadVendas();
-      setState(() {
-        _selectedDate = picked;
-      });
+
+      if (mounted) {
+        setState(() {
+          _selectedDate = picked;
+        });
+      }
     }
   }
 
@@ -140,7 +144,7 @@ class _ClientesPageState extends State<ClientesPage> {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
               Text(
                 formattedDate,
@@ -321,14 +325,36 @@ class _ClientesPageState extends State<ClientesPage> {
 
   Row _buildCabecalho(double width) {
     final celulaWidth = width / 6;
+    final removeZeros = RegExp(r'\.0+$');
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
-        _buildCelula(texto: 'Cliente', width: celulaWidth, height: 60),
-        _buildCelula(texto: 'Pimenta\n${_precosProdutosMap['Pimenta']} R\$', width: celulaWidth, height: 60, idProduto: _idsProdutosMap['Pimenta']),
-        _buildCelula(texto: 'Quiabo\n${_precosProdutosMap['Quiabo']} R\$', width: celulaWidth, height: 60, idProduto: _idsProdutosMap['Quiabo']),
-        _buildCelula(texto: 'Maxixe\n${_precosProdutosMap['Maxixe']} R\$', width: celulaWidth, height: 60, idProduto: _idsProdutosMap['Maxixe']),
-        _buildCelula(texto: 'Jiló\n${_precosProdutosMap['Jiló']} R\$', width: celulaWidth, height: 60, idProduto: _idsProdutosMap['Jiló']),
+        celula(texto: 'Cliente', width: celulaWidth, height: 60),
+        celulaColunaPrecoEditavel(
+          texto: 'Pimenta\n${_precosProdutosMap['Pimenta'].toString().replaceAll(removeZeros, "")} R\$',
+          width: celulaWidth,
+          height: 60,
+          onTap: () {
+            showDialogEditarPreco(context: context, idProduto: _idsProdutosMap['Pimenta']!, setState: () async {
+              await _loadVendas();
+            }, dataSelecionada: _selectedDate);
+          },
+        ),
+        _buildCelula(
+            texto: 'Quiabo\n${_precosProdutosMap['Quiabo'].toString().replaceAll(removeZeros, "")} R\$',
+            width: celulaWidth,
+            height: 60,
+            idProduto: _idsProdutosMap['Quiabo']),
+        _buildCelula(
+            texto: 'Maxixe\n${_precosProdutosMap['Maxixe'].toString().replaceAll(removeZeros, "")} R\$',
+            width: celulaWidth,
+            height: 60,
+            idProduto: _idsProdutosMap['Maxixe']),
+        _buildCelula(
+            texto: 'Jiló\n${_precosProdutosMap['Jiló'].toString().replaceAll(removeZeros, "")} R\$',
+            width: celulaWidth,
+            height: 60,
+            idProduto: _idsProdutosMap['Jiló']),
         _buildCelula(texto: 'Total', width: celulaWidth, height: 60),
       ],
     );
@@ -336,6 +362,8 @@ class _ClientesPageState extends State<ClientesPage> {
 
   Row _buildLinha(LinhaVendaDto venda, double width) {
     final celulaWidth = width / 6;
+    final removeZeros = RegExp(r'\.0+$');
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -369,9 +397,10 @@ class _ClientesPageState extends State<ClientesPage> {
             idPessoa: venda.idPessoa,
             idProduto: venda.idJilo),
         _buildCelula(
-            texto:
-                "${venda.quantidadePimenta * _precosProdutosMap['Pimenta']! + venda.quantidadeQuiabo * _precosProdutosMap['Quiabo']! + venda.quantidadeMaxixe * _precosProdutosMap['Maxixe']! + venda.quantidadeJilo * _precosProdutosMap['Jiló']!} R\$",
-            width: celulaWidth),
+          texto:
+              '${((venda.quantidadePimenta * _precosProdutosMap['Pimenta']! + venda.quantidadeQuiabo * _precosProdutosMap['Quiabo']! + venda.quantidadeMaxixe * _precosProdutosMap['Maxixe']! + venda.quantidadeJilo * _precosProdutosMap['Jiló']!).toStringAsFixed(2)).replaceAll(removeZeros, "")} R\$',
+          width: celulaWidth,
+        ),
       ],
     );
   }

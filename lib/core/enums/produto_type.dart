@@ -1,0 +1,4 @@
+enum ProdutoType {
+  kg,
+  saco,
+}
