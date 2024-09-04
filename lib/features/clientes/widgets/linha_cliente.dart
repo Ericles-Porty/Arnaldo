@@ -59,35 +59,47 @@ class _LinhaClienteState extends State<LinhaCliente> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.4,
-                      child: Text(
-                        cliente.nome,
-                        style: TextStyle(
-                          color: cliente.ativo ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
-                          fontSize: 42,
-                          decoration: cliente.ativo ? TextDecoration.none : TextDecoration.lineThrough,
-                          fontWeight: FontWeight.w500,
+                    Expanded(
+                      child: FittedBox(
+                        alignment: Alignment.centerLeft,
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          cliente.nome,
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            color: cliente.ativo ? Theme.of(context).colorScheme.primary : Theme.of(context).disabledColor,
+                            fontSize: 42,
+                            decoration: cliente.ativo ? TextDecoration.none : TextDecoration.lineThrough,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
-                    IconButton(
-                      iconSize: 42,
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () async => await _showDialogEditarCliente(context, cliente),
-                    ),
-                    IconButton(
-                      iconSize: 42,
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () async => await _showDialogApagarCliente(context, cliente),
-                    ),
-                    Switch(
-                      value: cliente.ativo,
-                      onChanged: (value) async => await _onToggle(value),
-                    ),
                     SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.15,
-                        child: Text(cliente.ativo ? 'Ativo' : 'Inativo', style: const TextStyle(fontSize: 36), textAlign: TextAlign.right)),
+                      width: 250,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            iconSize: 42,
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () async => await _showDialogEditarCliente(context, cliente),
+                          ),
+                          const SizedBox(width: 24),
+                          IconButton(
+                            iconSize: 42,
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () async => await _showDialogApagarCliente(context, cliente),
+                          ),
+                          const SizedBox(width: 24),
+                          Switch(
+                            value: cliente.ativo,
+                            onChanged: (value) async => await _onToggle(value),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

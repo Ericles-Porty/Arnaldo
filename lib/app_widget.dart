@@ -10,6 +10,7 @@ class AppWidget extends StatelessWidget {
     return MaterialApp.router(
       title: 'Gerenciador de Vendas',
       theme: ThemeData(
+        fontFamily: 'Jost',
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightGreen),
         useMaterial3: true,
       ),
