@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:arnaldo/core/database/database_ddl.dart';
+import 'package:arnaldo/core/database/database_seed.dart';
 import 'package:arnaldo/core/utils.dart';
-import 'package:arnaldo/models/Produto.dart';
+import 'package:arnaldo/models/operacao.dart';
 import 'package:arnaldo/models/pessoa.dart';
+import 'package:arnaldo/models/produto.dart';
 import 'package:arnaldo/models/produto_historico.dart';
-import 'package:arnaldo/models/venda.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -55,56 +57,8 @@ class DatabaseHelper {
   }
 
   Future<void> _onCreate(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE produto(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT,
-        tipo TEXT
-      )
-    ''');
-
-    await db.insert('produto', {'nome': 'Pimenta', 'tipo': 'kg'});
-    await db.insert('produto', {'nome': 'Quiabo', 'tipo': 'saco'});
-    await db.insert('produto', {'nome': 'Maxixe', 'tipo': 'saco'});
-    await db.insert('produto', {'nome': 'Jiló', 'tipo': 'saco'});
-
-    await db.execute('''
-      CREATE TABLE pessoa(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT,
-        tipo TEXT,
-        ativo INTEGER DEFAULT 1
-      )
-    ''');
-
-    await db.execute('''
-      CREATE TABLE produto_historico(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_produto INTEGER,
-        valor REAL,
-        data TEXT,
-        FOREIGN KEY (id_produto) REFERENCES produto (id)
-      )
-    ''');
-
-    await db.insert('produto_historico', {'id_produto': 1, 'valor': 0.0, 'data': '2024-01-01'});
-    await db.insert('produto_historico', {'id_produto': 2, 'valor': 0.0, 'data': '2024-01-01'});
-    await db.insert('produto_historico', {'id_produto': 3, 'valor': 0.0, 'data': '2024-01-01'});
-    await db.insert('produto_historico', {'id_produto': 4, 'valor': 0.0, 'data': '2024-01-01'});
-
-    await db.execute('''
-      CREATE TABLE venda(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        id_produto_historico INTEGER,
-        id_pessoa INTEGER,
-        quantidade REAL,
-        preco REAL,
-        valor REAL,   
-        data TEXT,     
-        FOREIGN KEY (id_produto_historico) REFERENCES produto_historico (id),
-        FOREIGN KEY (id_pessoa) REFERENCES pessoa (id)
-      )
-    ''');
+    await databaseDdl(db, version);
+    await databaseSeed(db, version);
   }
 
   /// Pessoa
@@ -122,7 +76,7 @@ class DatabaseHelper {
 
   Future<int> insertPessoa(String nome, String tipo) async {
     final db = await database;
-    return await db.insert('pessoa', {'nome': nome, 'tipo': tipo});
+    return await db.insert('pessoa', {'nome': nome, 'tipo': tipo, 'ativo': 1});
   }
 
   Future<int> updatePessoa(int id, String nome) async {
@@ -153,14 +107,14 @@ class DatabaseHelper {
     return response.map((produto) => Produto.fromMap(produto)).toList();
   }
 
-  Future<int> insertProduto(String nome, String tipo) async {
+  Future<int> insertProduto(String nome, String medida) async {
     final db = await database;
-    return await db.insert('produto', {'nome': nome, 'tipo': tipo});
+    return await db.insert('produto', {'nome': nome, 'medida': medida});
   }
 
-  Future<int> updateProduto(int id, String nome, String tipo) async {
+  Future<int> updateProduto(int id, String nome, String medida) async {
     final db = await database;
-    return await db.update('produto', {'nome': nome, 'tipo': tipo}, where: 'id = ?', whereArgs: [id]);
+    return await db.update('produto', {'nome': nome, 'medida': medida}, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<int> deleteProduto(int id) async {
@@ -176,7 +130,7 @@ class DatabaseHelper {
     if (data != null) query += ' AND data <= ?';
     query += ' ORDER BY data DESC, id DESC LIMIT 1';
 
-    final response = await db.rawQuery(query, data != null ? [idProduto, getFormattedDate(data)] : [idProduto]);
+    final response = await db.rawQuery(query, data != null ? [idProduto, formatarDataPadraoUs(data)] : [idProduto]);
 
     if (response.isEmpty) {
       throw Exception('Nenhum produto cadastrado até a data informada');
@@ -185,25 +139,21 @@ class DatabaseHelper {
     return ProdutoHistorico.fromMap(response.first);
   }
 
-  Future<int> insertProdutoHistorico(int idProduto, double valor, DateTime data) async {
+  Future<int> insertProdutoHistorico(int idProduto, String tipo, double preco, DateTime data) async {
     final db = await database;
-    // primeiro verifica se já existe um registro para a data informada
-    final response = await db.query('produto_historico', where: 'id_produto = ? AND data = ?', whereArgs: [idProduto, getFormattedDate(data)]);
+    final response =
+        await db.query('produto_historico', where: 'id_produto = ? AND tipo = ? AND data = ?', whereArgs: [idProduto, tipo, formatarDataPadraoUs(data)]);
 
     if (response.isNotEmpty) {
-      return await db.update('produto_historico', {'valor': valor}, where: 'id = ?', whereArgs: [response.first['id']]);
+      return await db.update('produto_historico', {'preco': preco}, where: 'id = ?', whereArgs: [response.first['id']]);
     }
 
     return await db.insert('produto_historico', {
       'id_produto': idProduto,
-      'valor': valor,
-      'data': getFormattedDate(data),
+      'tipo': tipo,
+      'preco': preco,
+      'data': formatarDataPadraoUs(data),
     });
-  }
-
-  Future<int> updateProdutoHistorico(int id, double valor) async {
-    final db = await database;
-    return await db.update('produto_historico', {'valor': valor}, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<int> deleteProdutoHistorico(int id) async {
@@ -211,83 +161,95 @@ class DatabaseHelper {
     return await db.delete('produto_historico', where: 'id = ?', whereArgs: [id]);
   }
 
-  /// Venda
-
-  Future<List<Venda>> getVendasByDate({required DateTime data, required String tipo}) async {
+  /// Operacao
+  Future<List<Operacao>> getOperacoesByDate({required DateTime data, required String tipo}) async {
     final db = await database;
 
-    const vendasByDateQuery = '''
+    const operacaosByDateQuery = '''
       SELECT 
-        v.*,
+        O.*,
         P.nome as pessoa_nome,
         P.tipo as pessoa_tipo,
         P.ativo as pessoa_ativo,
         Pr.id as produto_id,
         PR.nome as produto_nome,
-        PR.tipo as produto_tipo
-      FROM venda AS V
-      JOIN pessoa AS P ON p.id = v.id_pessoa
-      JOIN produto_historico AS PH ON ph.id = v.id_produto_historico
+        PR.tipo as produto_medida
+      FROM operacao AS O
+      JOIN pessoa AS P ON p.id = O.id_pessoa
+      JOIN produto_historico AS PH ON ph.id = O.id_produto_historico
       JOIN produto AS PR ON pr.id = ph.id_produto
       WHERE V.data = ? AND P.tipo = ?
     ''';
 
-    List<Map<String, dynamic>> vendasResponse = await db.rawQuery(vendasByDateQuery, [getFormattedDate(data), tipo]);
+    List<Map<String, dynamic>> operacaosResponse = await db.rawQuery(operacaosByDateQuery, [formatarDataPadraoUs(data), tipo]);
 
-    return vendasResponse.map((venda) {
-      final pessoa = Pessoa(id: venda['id_pessoa'], nome: venda['pessoa_nome'], tipo: venda['pessoa_tipo'], ativo: venda['pessoa_ativo']);
-      final produto = Produto(id: venda['produto_id'], nome: venda['produto_nome'], tipo: venda['produto_tipo']);
+    return operacaosResponse.map((operacao) {
+      final pessoa = Pessoa(id: operacao['id_pessoa'], nome: operacao['pessoa_nome'], tipo: operacao['pessoa_tipo'], ativo: operacao['pessoa_ativo']);
+      final produto = Produto(id: operacao['produto_id'], nome: operacao['produto_nome'], medida: operacao['produto_medida']);
 
-      return Venda(
-        id: venda['id'],
-        idProdutoHistorico: venda['id_produto_historico'],
-        idPessoa: venda['id_pessoa'],
-        quantidade: venda['quantidade'],
-        preco: venda['preco'],
-        valor: venda['valor'],
-        data: venda['data'],
+      return Operacao(
+        id: operacao['id'],
+        idProdutoHistorico: operacao['id_produto_historico'],
+        idPessoa: operacao['id_pessoa'],
+        tipo: operacao['tipo'],
+        quantidade: operacao['quantidade'],
+        preco: operacao['preco'],
+        desconto: operacao['desconto'],
+        data: operacao['data'],
         pessoa: pessoa,
         produto: produto,
       );
     }).toList();
   }
 
-  Future<int> insertVenda(int idPessoa, int idProduto, double quantidade, DateTime data) async {
+  Future<int> insertOperacao({
+    required int idPessoa,
+    required int idProduto,
+    required String tipoOperacao,
+    required double quantidade,
+    required DateTime data,
+    double desconto = 0,
+  }) async {
     final db = await database;
 
-    String formattedDate = getFormattedDate(data);
+    String dataFormatada = formatarDataPadraoUs(data);
 
     const lastProdutoHistoricoByDateQuery = '''
       SELECT * 
       FROM produto_historico 
-      WHERE id_produto = ? AND 
-      data <= ? ORDER BY data DESC LIMIT 1
+      WHERE id_produto = ? AND tipo = ? AND data <= ? ORDER BY data DESC LIMIT 1
     ''';
-    List<Map<String, dynamic>> produtoHistoricoResponse = await db.rawQuery(lastProdutoHistoricoByDateQuery, [idProduto, formattedDate]);
+    List<Map<String, dynamic>> produtoHistoricoResponse = await db.rawQuery(lastProdutoHistoricoByDateQuery, [idProduto, tipoOperacao, dataFormatada]);
 
     if (produtoHistoricoResponse.isEmpty) {
-      throw Exception('Nenhum produto cadastrado até a data informada');
+      throw Exception('Nenhum produto com preço até a data informada');
     }
 
     final produtoHistorico = ProdutoHistorico.fromMap(produtoHistoricoResponse.first);
 
-    return await db.insert('venda', {
+    return await db.insert('operacao', {
       'id_produto_historico': produtoHistorico.id,
       'id_pessoa': idPessoa,
+      'tipo': tipoOperacao,
       'quantidade': quantidade,
-      'preco': produtoHistorico.valor,
-      'valor': quantidade * produtoHistorico.valor,
-      'data': formattedDate,
+      'preco': produtoHistorico.preco,
+      'desconto': desconto,
+      'data': dataFormatada,
     });
   }
 
-  Future<int> updateVenda(int id, double quantidade) async {
+  Future<int> updateOperacao(int id, double quantidade) async {
     final db = await database;
-    return await db.update('venda', {'quantidade': quantidade}, where: 'id = ?', whereArgs: [id]);
+    return await db.update('operacao', {'quantidade': quantidade}, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> deleteVenda(int id) async {
+  Future<int> updateOperacaoDesconto(int id, double desconto) async {
     final db = await database;
-    return await db.delete('venda', where: 'id = ?', whereArgs: [id]);
+    return await db.update('operacao', {'desconto': desconto}, where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<int> deleteOperacao(int id) async {
+    final db = await database;
+    return await db.delete('operacao', where: 'id = ?', whereArgs: [id]);
   }
 }

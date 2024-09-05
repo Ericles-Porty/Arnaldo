@@ -1,0 +1,4 @@
+enum OperacaoType {
+  compra,
+  venda,
+}

@@ -1,16 +1,16 @@
 class ProdutoHistorico {
   final int id;
   final int idProduto;
-  final double valor;
+  final double preco;
   final String data;
 
-  ProdutoHistorico({required this.id, required this.idProduto, required this.valor, required this.data});
+  ProdutoHistorico({required this.id, required this.idProduto, required this.preco, required this.data});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'id_produto': idProduto,
-      'valor': valor,
+      'preco': preco,
       'data': data,
     };
   }
@@ -19,7 +19,7 @@ class ProdutoHistorico {
     return ProdutoHistorico(
       id: map['id'],
       idProduto: map['id_produto'],
-      valor: map['valor'],
+      preco: map['preco'],
       data: map['data'],
     );
   }
@@ -27,13 +27,13 @@ class ProdutoHistorico {
   ProdutoHistorico copyWith({
     int? id,
     int? idProduto,
-    double? valor,
+    double? preco,
     String? data,
   }) {
     return ProdutoHistorico(
       id: id ?? this.id,
       idProduto: idProduto ?? this.idProduto,
-      valor: valor ?? this.valor,
+      preco: preco ?? this.preco,
       data: data ?? this.data,
     );
   }

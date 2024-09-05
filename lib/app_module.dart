@@ -1,4 +1,4 @@
-import 'package:arnaldo/core/database_helper.dart';
+import 'package:arnaldo/core/database/database_helper.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 import 'features/home/home_module.dart';

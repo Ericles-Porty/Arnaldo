@@ -1,15 +1,15 @@
 class Produto {
   final int id;
   final String nome;
-  final String tipo;
+  final String medida;
 
-  Produto({required this.id, required this.nome, required this.tipo});
+  Produto({required this.id, required this.nome, required this.medida});
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
       'nome': nome,
-      'tipo': tipo,
+      'medida': medida,
     };
   }
 
@@ -17,7 +17,7 @@ class Produto {
     return Produto(
       id: map['id'],
       nome: map['nome'],
-      tipo: map['tipo'],
+      medida: map['medida'],
     );
   }
 }

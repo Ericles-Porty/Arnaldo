@@ -1,4 +1,4 @@
-import 'package:arnaldo/core/database_helper.dart';
+import 'package:arnaldo/core/database/database_helper.dart';
 import 'package:arnaldo/core/enums/pessoa_type.dart';
 import 'package:arnaldo/core/enums/rota.dart';
 import 'package:arnaldo/models/pessoa.dart';
@@ -129,8 +129,8 @@ class _LinhaPessoaState extends State<LinhaPessoa> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Apagar pessoa ${pessoa.nome}'),
-          content: Text('Deseja realmente apagar o pessoa ${pessoa.nome}?'),
+          title: Text('Apagar ${pessoa.tipo} ${pessoa.nome}'),
+          content: Text('Deseja realmente apagar o ${pessoa.tipo} ${pessoa.nome}?'),
           actions: <Widget>[
             TextButton(
               child: const Text('Cancelar'),
@@ -150,7 +150,7 @@ class _LinhaPessoaState extends State<LinhaPessoa> {
                         ? Rota.fornecedores
                         : Rota.home;
                 Modular.to.pop();
-                Modular.to.pushNamed('/${rota.name}/');
+                Modular.to.pushNamed('/pessoas/${rota.name}');
               },
             ),
           ],
@@ -165,7 +165,7 @@ class _LinhaPessoaState extends State<LinhaPessoa> {
       builder: (BuildContext context) {
         final TextEditingController textController = TextEditingController(text: pessoa.nome);
         return AlertDialog(
-          title: Text('Editar pessoa ${pessoa.nome}'),
+          title: Text('Editar ${pessoa.tipo} ${pessoa.nome}'),
           content: TextField(
             controller: textController,
             decoration: const InputDecoration(labelText: 'Nome'),

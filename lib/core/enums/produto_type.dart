@@ -1,4 +1,0 @@
-enum ProdutoType {
-  kg,
-  saco,
-}

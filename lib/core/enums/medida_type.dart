@@ -1,0 +1,4 @@
+enum MedidaType {
+  kg,
+  saco,
+}

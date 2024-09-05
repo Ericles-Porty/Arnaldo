@@ -1,0 +1,5 @@
+
+enum ProdutoHistoricoType {
+  venda,
+  compra,
+}

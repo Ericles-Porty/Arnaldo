@@ -1,5 +1,7 @@
-import 'package:arnaldo/core/database_helper.dart';
+import 'package:arnaldo/core/database/database_helper.dart';
+import 'package:arnaldo/core/enums/rota.dart';
 import 'package:arnaldo/features/home/widgets/botao_menu.dart';
+import 'package:arnaldo/widgets/my_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
@@ -18,17 +20,7 @@ class _HomePageState extends State<HomePage> {
     Size screenSize = MediaQuery.of(context).size;
     double size = screenSize.width * 0.3;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Arnaldo',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-          ),
-        ),
-        elevation: 0,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
+      appBar: myAppBar(context: context, title: 'Arnaldo'),
       body: SingleChildScrollView(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -40,9 +32,9 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    BotaoMenu(texto: 'Clientes', icone: Icons.person, rota: '/clientes/', size: size),
+                    BotaoMenu(texto: 'Clientes', icone: Icons.person, rota: '/pessoas/${Rota.clientes.name}', size: size),
                     const SizedBox(width: 24),
-                    BotaoMenu(texto: 'Fornecedores', icone: Icons.business, rota: '/fornecedores/', size: size),
+                    BotaoMenu(texto: 'Fornecedores', icone: Icons.business, rota: '/pessoas/${Rota.fornecedores.name}', size: size),
                   ],
                 ),
                 const SizedBox(height: 24),
