@@ -120,7 +120,7 @@ class DatabaseHelper {
 
   Future<List<Produto>> getProdutos() async {
     final db = await database;
-    final response = await db.query('produto');
+    final response = await db.query('produto', orderBy: 'nome');
     return response.map((produto) => Produto.fromMap(produto)).toList();
   }
 
@@ -145,43 +145,44 @@ class DatabaseHelper {
   Future<List<LinhaProdutoDto>> getProdutosPrecos(DateTime dataSelecionada) async {
     final db = await database;
 
-    const produtosPrecosQuery = '''
+    const produtosPrecosCompraQuery = '''
       SELECT 
         PR.nome,
-        PH.id as id_produto_historico,
+        PH.id_produto,
         PH.preco,
         PH.tipo
       FROM produto_historico AS PH
       JOIN produto AS PR ON PR.id = PH.id_produto
-      WHERE PH.data = (SELECT MAX(data) FROM produto_historico WHERE data <= ? AND id_produto = PH.id_produto)
-      GROUP BY PR.nome, PH.tipo
+      WHERE tipo = 'compra' AND PH.data = (SELECT MAX(data) FROM produto_historico WHERE tipo = 'compra' AND id_produto = PH.id_produto AND data <= ?) 
     ''';
 
-    List<Map<String, dynamic>> produtosPrecosResponse = await db.rawQuery(produtosPrecosQuery, [formatarDataPadraoUs(dataSelecionada)]);
+    const produtosPrecosVentaQuery = '''
+      SELECT 
+        PR.nome,
+        PH.id_produto,
+        PH.preco,
+        PH.tipo
+      FROM produto_historico AS PH
+      JOIN produto AS PR ON PR.id = PH.id_produto
+      WHERE tipo = 'venda' AND PH.data = (SELECT MAX(data) FROM produto_historico WHERE tipo = 'venda' AND id_produto = PH.id_produto AND data <= ?) 
+    ''';
 
-    Map<String,LinhaProdutoDto> produtosPrecos = {};
+    List<Map<String, dynamic>> produtosPrecosCompraResponse = await db.rawQuery(produtosPrecosCompraQuery, [formatarDataPadraoUs(dataSelecionada)]);
+    List<Map<String, dynamic>> produtosPrecosVentaResponse = await db.rawQuery(produtosPrecosVentaQuery, [formatarDataPadraoUs(dataSelecionada)]);
+    List<Produto> produtos = await getProdutos();
 
+    Map<String, LinhaProdutoDto> produtosPrecos = {};
 
-
-    for (var produtoHistorico in produtosPrecosResponse) {
-      produtosPrecos[produtoHistorico['nome']] = LinhaProdutoDto(
-        nome: produtoHistorico['nome'],
-        idCompra: 0,
-        idVenda: 0,
-        precoCompra: 0,
-        precoVenda: 0,
-        tipo: ProdutoHistoricoType.values.firstWhere((e) => e.name == produtoHistorico['tipo']),
-      );
+    for (var produto in produtos) {
+      produtosPrecos[produto.nome] = LinhaProdutoDto(nome: produto.nome, idProduto: produto.id, precoCompra: 0, precoVenda: 0);
     }
 
-    for (var produtoHistorico in produtosPrecosResponse) {
-      if (produtoHistorico['tipo'] == ProdutoHistoricoType.compra.name) {
-        produtosPrecos[produtoHistorico['nome']]!.idCompra = produtoHistorico['id_produto_historico'];
-        produtosPrecos[produtoHistorico['nome']]!.precoCompra = produtoHistorico['preco'];
-      } else if  (produtoHistorico['tipo'] == ProdutoHistoricoType.venda.name) {
-        produtosPrecos[produtoHistorico['nome']]!.idVenda = produtoHistorico['id_produto_historico'];
-        produtosPrecos[produtoHistorico['nome']]!.precoVenda = produtoHistorico['preco'];
-      }
+    for (var produtoHistorico in produtosPrecosCompraResponse) {
+      produtosPrecos[produtoHistorico['nome']]!.precoCompra = produtoHistorico['preco'];
+    }
+
+    for (var produtoHistorico in produtosPrecosVentaResponse) {
+      produtosPrecos[produtoHistorico['nome']]!.precoVenda = produtoHistorico['preco'];
     }
 
     return produtosPrecos.values.toList();
@@ -205,6 +206,7 @@ class DatabaseHelper {
 
   Future<int> insertProdutoHistorico(int idProduto, String tipo, double preco, DateTime data) async {
     final db = await database;
+
     final response =
         await db.query('produto_historico', where: 'id_produto = ? AND tipo = ? AND data = ?', whereArgs: [idProduto, tipo, formatarDataPadraoUs(data)]);
 
@@ -218,6 +220,11 @@ class DatabaseHelper {
       'preco': preco,
       'data': formatarDataPadraoUs(data),
     });
+  }
+
+  Future<int> updateProdutoHistorico(int id, double preco) async {
+    final db = await database;
+    return await db.update('produto_historico', {'preco': preco}, where: 'id = ?', whereArgs: [id]);
   }
 
   Future<int> deleteProdutoHistorico(int id) async {
