@@ -7,7 +7,7 @@ Future<void> databaseDdl(Database db, int version) async {
       CREATE TABLE produto(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT,
-        medida TEXT
+        medida TEXT CHECK(medida IN ('kg', 'saco'))
       )
     ''');
 
@@ -17,7 +17,7 @@ Future<void> databaseDdl(Database db, int version) async {
       CREATE TABLE pessoa(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         nome TEXT,
-        tipo TEXT,
+        tipo TEXT CHECK(tipo IN ('cliente', 'fornecedor')),
         ativo INTEGER DEFAULT 1
       )
     ''');
@@ -29,16 +29,16 @@ Future<void> databaseDdl(Database db, int version) async {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_produto INTEGER,
         preco REAL,
-        tipo TEXT,
+        tipo TEXT CHECK(tipo IN ('compra', 'venda')),
         data TEXT,
-        FOREIGN KEY (id_produto) REFERENCES produto (id)
+        FOREIGN KEY (id_produto) REFERENCES produto (id) ON DELETE CASCADE
       )
     ''');
 
   // Operacao
   // Tipo: compra, venda
   await db.execute('''
-      CREATE TABLE Operacao(
+      CREATE TABLE operacao(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         id_produto_historico INTEGER,
         id_pessoa INTEGER,
@@ -46,10 +46,15 @@ Future<void> databaseDdl(Database db, int version) async {
         preco REAL,
         valor REAL,   
         data TEXT,   
-        tipo TEXT, 
-        desconto REAL,
+        tipo TEXT CHECK(tipo IN ('compra', 'venda')),
+        desconto REAL DEFAULT 0,
         FOREIGN KEY (id_produto_historico) REFERENCES produto_historico (id),
-        FOREIGN KEY (id_pessoa) REFERENCES pessoa (id)
+        FOREIGN KEY (id_pessoa) REFERENCES pessoa (id) ON DELETE CASCADE
       )
     ''');
+
+  //Indíces
+  await db.execute('CREATE INDEX index_pessoa_tipo ON pessoa (tipo);');
+  await db.execute('CREATE INDEX index_produto_historico_id_produto_e_data ON produto_historico (id_produto, data);');
+  await db.execute('CREATE INDEX index_operacao_id_pessoa_e_data ON operacao (id_pessoa, data);');
 }

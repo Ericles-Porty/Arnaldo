@@ -17,6 +17,7 @@ void main() async {
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    print(await getDatabasesPath());
   }
 
   WidgetsFlutterBinding.ensureInitialized();

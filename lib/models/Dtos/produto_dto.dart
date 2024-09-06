@@ -3,6 +3,7 @@ class ProdutoDto {
   final String nome;
   final double valor;
 
+
   ProdutoDto({
     required this.id,
     required this.nome,

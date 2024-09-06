@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:arnaldo/core/database/database_ddl.dart';
 import 'package:arnaldo/core/database/database_seed.dart';
+import 'package:arnaldo/core/enums/produto_historico_type.dart';
 import 'package:arnaldo/core/utils.dart';
+import 'package:arnaldo/models/Dtos/linha_produto_dto.dart';
 import 'package:arnaldo/models/operacao.dart';
 import 'package:arnaldo/models/pessoa.dart';
 import 'package:arnaldo/models/produto.dart';
@@ -13,9 +15,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
+  static const String _databaseName = 'arnaldo.db';
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
-  static const String _databaseName = 'arnaldo.db';
 
   factory DatabaseHelper() {
     return _instance;
@@ -53,7 +55,22 @@ class DatabaseHelper {
       path,
       version: 1,
       onCreate: _onCreate,
+      onOpen: _onOpen,
     );
+  }
+
+  Future<void> _onOpen(Database db) async {
+    await db.execute('PRAGMA foreign_keys = ON');
+
+    // await db.execute('''
+    // INSERT INTO produto_historico (id_produto, tipo, preco, data)
+    // SELECT id, 'compra' , 50.0, '2024-09-06' FROM produto;
+    // ''');
+    //
+    // await db.execute('''
+    // INSERT INTO produto_historico (id_produto, tipo, preco, data)
+    // SELECT id, 'venda' , 100.0, '2024-09-06' FROM produto;
+    // ''');
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -123,6 +140,53 @@ class DatabaseHelper {
   }
 
   /// Produto Historico
+
+  /// Campos
+  Future<List<LinhaProdutoDto>> getProdutosPrecos(DateTime dataSelecionada) async {
+    final db = await database;
+
+    const produtosPrecosQuery = '''
+      SELECT 
+        PR.nome,
+        PH.id as id_produto_historico,
+        PH.preco,
+        PH.tipo
+      FROM produto_historico AS PH
+      JOIN produto AS PR ON PR.id = PH.id_produto
+      WHERE PH.data = (SELECT MAX(data) FROM produto_historico WHERE data <= ? AND id_produto = PH.id_produto)
+      GROUP BY PR.nome, PH.tipo
+    ''';
+
+    List<Map<String, dynamic>> produtosPrecosResponse = await db.rawQuery(produtosPrecosQuery, [formatarDataPadraoUs(dataSelecionada)]);
+
+    Map<String,LinhaProdutoDto> produtosPrecos = {};
+
+
+
+    for (var produtoHistorico in produtosPrecosResponse) {
+      produtosPrecos[produtoHistorico['nome']] = LinhaProdutoDto(
+        nome: produtoHistorico['nome'],
+        idCompra: 0,
+        idVenda: 0,
+        precoCompra: 0,
+        precoVenda: 0,
+        tipo: ProdutoHistoricoType.values.firstWhere((e) => e.name == produtoHistorico['tipo']),
+      );
+    }
+
+    for (var produtoHistorico in produtosPrecosResponse) {
+      if (produtoHistorico['tipo'] == ProdutoHistoricoType.compra.name) {
+        produtosPrecos[produtoHistorico['nome']]!.idCompra = produtoHistorico['id_produto_historico'];
+        produtosPrecos[produtoHistorico['nome']]!.precoCompra = produtoHistorico['preco'];
+      } else if  (produtoHistorico['tipo'] == ProdutoHistoricoType.venda.name) {
+        produtosPrecos[produtoHistorico['nome']]!.idVenda = produtoHistorico['id_produto_historico'];
+        produtosPrecos[produtoHistorico['nome']]!.precoVenda = produtoHistorico['preco'];
+      }
+    }
+
+    return produtosPrecos.values.toList();
+  }
+
   Future<ProdutoHistorico> getProdutoHistorico({required int idProduto, DateTime? data}) async {
     final db = await database;
 

@@ -1,4 +1,5 @@
 import 'package:arnaldo/features/produtos/produtos_controller.dart';
+import 'package:arnaldo/models/Dtos/linha_produto_dto.dart';
 import 'package:arnaldo/widgets/my_app_bar.dart';
 import 'package:arnaldo/widgets/my_divider.dart';
 import 'package:flutter/material.dart';
@@ -106,7 +107,77 @@ class _ProdutosPageState extends State<ProdutosPage> {
                 ValueListenableBuilder(
                   valueListenable: _controller.dataSelecionada,
                   builder: (BuildContext context, DateTime value, Widget? child) {
-                    return Text('Data selecionada: ${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}');
+                    return FutureBuilder(
+                      future: _controller.fetchProdutosPrecos(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Erro: ${snapshot.error}'),
+                          );
+                        } else {
+                          final List<LinhaProdutoDto> produtos = snapshot.data as List<LinhaProdutoDto>;
+                          return Expanded(
+                            child: ListView.builder(
+                              itemCount: produtos.length,
+                              itemBuilder: (context, index) {
+                                final LinhaProdutoDto produto = produtos[index];
+                                return Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        SizedBox(
+                                          width: size.width * 0.4,
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(
+                                              produto.nome,
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          width: size.width * 0.6,
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              SizedBox(
+                                                width: size.width * 0.25,
+                                                child: Text(
+                                                  produto.precoCompra.toStringAsFixed(2),
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                width: size.width * 0.25,
+                                                child: Text(
+                                                  produto.precoVenda.toStringAsFixed(2),
+                                                  style: const TextStyle(
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    myDivider(context: context),
+                                  ],
+                                );
+                              },
+                            ),
+                          );
+                        }
+                      },
+                    );
                   },
                 )
               ],
