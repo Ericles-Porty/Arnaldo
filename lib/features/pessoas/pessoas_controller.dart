@@ -4,7 +4,6 @@ import 'package:arnaldo/models/pessoa.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class PessoasController {
-
   List<Pessoa> _pessoas = [];
 
   List<Pessoa> get pessoas => _pessoas;

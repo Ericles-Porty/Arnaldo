@@ -1,4 +1,3 @@
-
 enum ProdutoHistoricoType {
   venda,
   compra,

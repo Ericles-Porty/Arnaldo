@@ -8,7 +8,6 @@ class ProdutosController {
   final ValueNotifier<DateTime> dataSelecionada = ValueNotifier<DateTime>(DateTime.now());
   final ValueNotifier<List<LinhaProdutoDto>> produtosPrecos = ValueNotifier<List<LinhaProdutoDto>>([]);
 
-
   String get dataSelecionadaFormatadaPadraoBr =>
       '${dataSelecionada.value.day.toString().padLeft(2, '0')}/${dataSelecionada.value.month.toString().padLeft(2, '0')}/${dataSelecionada.value.year}';
 

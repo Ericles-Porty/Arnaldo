@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:arnaldo/core/database/database_ddl.dart';
 import 'package:arnaldo/core/database/database_seed.dart';
-import 'package:arnaldo/core/enums/produto_historico_type.dart';
 import 'package:arnaldo/core/utils.dart';
 import 'package:arnaldo/models/Dtos/linha_produto_dto.dart';
 import 'package:arnaldo/models/operacao.dart';
