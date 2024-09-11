@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
     Size screenSize = MediaQuery.of(context).size;
     double size = screenSize.width * 0.3;
     return Scaffold(
-      appBar: myAppBar(context: context, title: 'Arnaldo'),
+      appBar: myAppBar(context: context, title: 'Arnaldo', hasLeading: false),
       body: SingleChildScrollView(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

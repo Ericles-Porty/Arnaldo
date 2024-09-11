@@ -33,7 +33,7 @@ class _PessoasPageState extends State<PessoasPage> {
             ? 'Fornecedores'
             : '';
     return Scaffold(
-      appBar: myAppBar(context: context, title: title),
+      appBar: myAppBar(context: context, title: title, hasLeading: true),
       body: FutureBuilder(
         future: _controller.fetchPessoas(widget.pessoaType),
         builder: (context, AsyncSnapshot<List<Pessoa>> snapshot) {

@@ -34,6 +34,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
       appBar: myAppBar(
         context: context,
         title: 'Produtos',
+        hasLeading: true,
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4),
