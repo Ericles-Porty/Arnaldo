@@ -9,7 +9,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 Future<void> resetDatabase() async {
   String path = join(await getDatabasesPath(), 'arnaldo.db');
-  print(path);
   await deleteDatabase(path);
 }
 
@@ -24,6 +23,8 @@ void main() async {
   //await resetDatabase();
 
   setPrintResolver((text) => print(text));
+
+  // debugPrintRebuildDirtyWidgets = true;
 
   runApp(
     ModularApp(

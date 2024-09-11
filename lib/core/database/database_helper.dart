@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:arnaldo/core/database/database_ddl.dart';
 import 'package:arnaldo/core/database/database_seed.dart';
 import 'package:arnaldo/core/utils.dart';
-import 'package:arnaldo/models/Dtos/linha_produto_dto.dart';
+import 'package:arnaldo/models/dtos/linha_produto_dto.dart';
 import 'package:arnaldo/models/operacao.dart';
 import 'package:arnaldo/models/pessoa.dart';
 import 'package:arnaldo/models/produto.dart';
@@ -139,8 +139,49 @@ class DatabaseHelper {
   }
 
   /// Produto Historico
+  Future<LinhaProdutoDto> getProdutoPreco(int idProduto, DateTime dataSelecionada) async {
+    final db = await database;
 
-  /// Campos
+    const produtoPrecoCompraQuery = '''
+      SELECT 
+        PR.nome,
+        PH.id_produto,
+        PH.preco,
+        PH.tipo
+      FROM produto_historico AS PH
+      JOIN produto AS PR ON PR.id = PH.id_produto
+      WHERE tipo = 'compra' AND PH.data = (SELECT MAX(data) FROM produto_historico WHERE tipo = 'compra' AND id_produto = PH.id_produto AND data <= ?) AND PH.id_produto = ?
+    ''';
+
+    final produtoPrecoCompraResponse = await db.rawQuery(produtoPrecoCompraQuery, [formatarDataPadraoUs(dataSelecionada), idProduto]);
+    if (produtoPrecoCompraResponse.isEmpty) {
+      throw Exception('Nenhum produto cadastrado até a data informada');
+    }
+
+    const produtoPrecoVentaQuery = '''
+      SELECT 
+        PR.nome,
+        PH.id_produto,
+        PH.preco,
+        PH.tipo
+      FROM produto_historico AS PH
+      JOIN produto AS PR ON PR.id = PH.id_produto
+      WHERE tipo = 'venda' AND PH.data = (SELECT MAX(data) FROM produto_historico WHERE tipo = 'venda' AND id_produto = PH.id_produto AND data <= ?) AND PH.id_produto = ?
+    ''';
+
+    final produtoPrecoVentaResponse = await db.rawQuery(produtoPrecoVentaQuery, [formatarDataPadraoUs(dataSelecionada), idProduto]);
+    if (produtoPrecoVentaResponse.isEmpty) {
+      throw Exception('Nenhum produto cadastrado até a data informada');
+    }
+
+    return LinhaProdutoDto(
+      nome: produtoPrecoCompraResponse.first['nome'] as String,
+      idProduto: produtoPrecoCompraResponse.first['id_produto'] as int,
+      precoCompra: produtoPrecoCompraResponse.first['preco'] as double,
+      precoVenda: produtoPrecoVentaResponse.first['preco'] as double,
+    );
+  }
+
   Future<List<LinhaProdutoDto>> getProdutosPrecos(DateTime dataSelecionada) async {
     final db = await database;
 

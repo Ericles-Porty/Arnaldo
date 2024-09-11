@@ -1,6 +1,6 @@
 // import 'package:arnaldo/core/database/database_helper.dart';
-// import 'package:arnaldo/models/Dtos/linha_venda_dto.dart';
-// import 'package:arnaldo/models/Dtos/produto_dto.dart';
+// import 'package:arnaldo/models/dtos/linha_venda_dto.dart';
+// import 'package:arnaldo/models/dtos/produto_dto.dart';
 // import 'package:arnaldo/models/produto_historico.dart';
 // import 'package:arnaldo/widgets/celula.dart';
 // import 'package:flutter/material.dart';

@@ -1,5 +1,5 @@
 // import 'package:arnaldo/core/database/database_helper.dart';
-// import 'package:arnaldo/models/Dtos/produto_dto.dart';
+// import 'package:arnaldo/models/dtos/produto_dto.dart';
 // import 'package:arnaldo/models/produto_historico.dart';
 // import 'package:arnaldo/pages/clientes_page.dart';
 // import 'package:arnaldo/widgets/my_app_bar.dart';
