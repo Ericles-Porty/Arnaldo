@@ -27,9 +27,6 @@ class _ProdutosPageState extends State<ProdutosPage> {
   @override
   Widget build(BuildContext context) {
     print('ProdutosPage.build');
-    print('Data selecionada: ${_controller.dataSelecionada.value}');
-    Size size = MediaQuery.of(context).size;
-    print('ProdutosPage.build.size: $size');
     return Scaffold(
       appBar: myAppBar(
         context: context,
@@ -44,7 +41,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
               children: <Widget>[
                 ElevatedButton(
                   onPressed: () {
-                     _showDatePicker(context);
+                    _showDatePicker(context);
                   },
                   child: Text(
                     _controller.dataSelecionadaFormatadaPadraoBr,
@@ -63,6 +60,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
       body: ValueListenableBuilder(
           valueListenable: _controller.dataSelecionada,
           builder: (BuildContext context, DateTime value, Widget? child) {
+            Size size = MediaQuery.of(context).size;
             return Column(
               children: [
                 myDivider(context: context),
@@ -140,8 +138,12 @@ class _ProdutosPageState extends State<ProdutosPage> {
                                 itemCount: produtos.length,
                                 itemBuilder: (context, index) {
                                   final LinhaProdutoDto produto = produtos[index];
-                                  final color = index % 2 == 0 ? Theme.of(context).scaffoldBackgroundColor : Colors.grey[200];
-                                  return LinhaProduto(produto: produto, dataSelecionada: _controller.dataSelecionada.value, backgroundColor: color);
+                                  final corLinha = index % 2 == 0 ? Theme.of(context).scaffoldBackgroundColor : Colors.grey[200];
+                                  return LinhaProduto(
+                                    produto: produto,
+                                    dataSelecionada: _controller.dataSelecionada.value,
+                                    backgroundColor: corLinha,
+                                  );
                                 },
                               ),
                             );

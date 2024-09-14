@@ -56,10 +56,10 @@ class _LinhaProdutoState extends State<LinhaProduto> {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
     return ValueListenableBuilder<LinhaProdutoDto>(
         valueListenable: _controller.produto,
         builder: (context, produto, child) {
+          Size size = MediaQuery.of(context).size;
           return Column(
             children: [
               Container(
@@ -102,7 +102,6 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                                   'R\$${produto.precoCompra.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
@@ -123,7 +122,6 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                                   'R\$${produto.precoVenda.toStringAsFixed(2)}',
                                   style: const TextStyle(
                                     fontSize: 16,
-                                    fontWeight: FontWeight.bold,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
@@ -147,12 +145,11 @@ class _LinhaProdutoState extends State<LinhaProduto> {
     required LinhaProdutoDto linhaProdutoDto,
     required ProdutoHistoricoType tipo,
   }) {
-    double preco = tipo == ProdutoHistoricoType.compra ? linhaProdutoDto.precoCompra : linhaProdutoDto.precoVenda;
-
     return showDialog(
       context: context,
       builder: (BuildContext context) {
-        TextEditingController textEditingController = TextEditingController();
+        double preco = tipo == ProdutoHistoricoType.compra ? linhaProdutoDto.precoCompra : linhaProdutoDto.precoVenda;
+        TextEditingController textEditingController = TextEditingController(text: preco.toStringAsFixed(2));
         return AlertDialog(
           title: Text('Editar preço de ${tipo.name}'),
           content: Column(

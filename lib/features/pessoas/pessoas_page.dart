@@ -89,6 +89,9 @@ class _PessoasPageState extends State<PessoasPage> {
           content: TextField(
             controller: controller,
             decoration: const InputDecoration(labelText: 'Nome'),
+            textCapitalization: TextCapitalization.words,
+            keyboardType: TextInputType.text,
+            autofocus: true,
           ),
           actions: <Widget>[
             TextButton(
@@ -100,8 +103,10 @@ class _PessoasPageState extends State<PessoasPage> {
             ElevatedButton(
               child: const Text('Salvar'),
               onPressed: () async {
-                final db = Modular.get<DatabaseHelper>();
-                db.insertPessoa(controller.text, widget.pessoaType.name);
+                if (controller.text.isNotEmpty) {
+                  final db = Modular.get<DatabaseHelper>();
+                  await db.insertPessoa(controller.text, widget.pessoaType.name);
+                }
                 Navigator.of(context).pop();
               },
             ),
