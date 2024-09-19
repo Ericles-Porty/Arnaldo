@@ -1,4 +1,5 @@
 import 'package:arnaldo/core/database/database_helper.dart';
+import 'package:arnaldo/core/enums/pessoa_type.dart';
 import 'package:arnaldo/core/enums/rota.dart';
 import 'package:arnaldo/features/home/widgets/botao_menu.dart';
 import 'package:arnaldo/widgets/my_app_bar.dart';
@@ -40,15 +41,15 @@ class _HomePageState extends State<HomePage> {
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    BotaoMenu(texto: 'Produtos', icone: Icons.inventory, rota: '/produtos/', size: size),
+                    BotaoMenu(texto: 'Produtos', icone: Icons.inventory, rota: '/${Rota.produtos.name}/', size: size),
                     const SizedBox(width: 24),
-                    BotaoMenu(texto: 'Vendas', icone: Icons.attach_money, rota: '/vendas/', size: size),
+                    BotaoMenu(texto: 'Vendas', icone: Icons.attach_money, rota: '/operacoes/pessoas', argumento: PessoaType.cliente, size: size),
                   ],
                 ),
                 const SizedBox(height: 24),
                 Row(
                   children: [
-                    BotaoMenu(texto: 'Compras', icone: Icons.shopping_cart, rota: '/compras/', size: size),
+                    BotaoMenu(texto: 'Compras', icone: Icons.shopping_cart, rota: '/operacoes/pessoas', argumento: PessoaType.fornecedor, size: size),
                     const SizedBox(width: 24),
                     BotaoMenu(texto: 'Relatório', icone: Icons.report, rota: '/relatorio/', size: size),
                   ],

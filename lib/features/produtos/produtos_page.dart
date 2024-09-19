@@ -20,13 +20,11 @@ class _ProdutosPageState extends State<ProdutosPage> {
   @override
   void initState() {
     super.initState();
-    print('ProdutosPage.initState');
     _controller = Modular.get<ProdutosController>();
   }
 
   @override
   Widget build(BuildContext context) {
-    print('ProdutosPage.build');
     return Scaffold(
       appBar: myAppBar(
         context: context,

@@ -1,27 +1,20 @@
+import 'package:arnaldo/core/enums/pessoa_type.dart';
+import 'package:arnaldo/core/enums/rota.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-class BotaoMenu extends StatefulWidget {
-  BotaoMenu({
+class BotaoMenuOperacoes extends StatelessWidget {
+  const BotaoMenuOperacoes({
     super.key,
     required this.texto,
     required this.icone,
-    required this.rota,
-    required this.size,
-    this.argumento,
+    required this.tipoPessoa,
   });
 
   final String texto;
   final IconData icone;
-  final String rota;
-  final double size;
-  late Object? argumento;
+  final PessoaType tipoPessoa;
 
-  @override
-  State<BotaoMenu> createState() => _BotaoMenuState();
-}
-
-class _BotaoMenuState extends State<BotaoMenu> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
@@ -34,25 +27,23 @@ class _BotaoMenuState extends State<BotaoMenu> {
         ),
       ),
       child: SizedBox(
-        width: widget.size,
-        height: widget.size,
+        width: 150,
+        height: 100,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(widget.icone, size: 36),
+            Icon(icone, size: 24),
             FittedBox(
               fit: BoxFit.scaleDown,
               child: Text(
-                widget.texto,
-                style: const TextStyle(fontSize: 48),
+                texto,
+                style: const TextStyle(fontSize: 24),
               ),
             ),
           ],
         ),
       ),
-      onPressed: () {
-        Modular.to.pushNamed(widget.rota, arguments: widget.argumento);
-      },
+      onPressed: () => Modular.to.pushNamed('/operacoes/pessoas', arguments: tipoPessoa),
     );
   }
 }
