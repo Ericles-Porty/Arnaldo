@@ -149,30 +149,143 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
           ),
           myDivider(context: context, indent: 0),
           ValueListenableBuilder(
-              valueListenable: _controller.dataSelecionada,
-              builder: (BuildContext context, DateTime data, Widget? child) {
-                return FutureBuilder(
+            valueListenable: _controller.dataSelecionada,
+            builder: (BuildContext context, DateTime data, Widget? child) {
+              return Expanded(
+                child: FutureBuilder(
                   future: _controller.fetchOperacoes(widget.pessoa),
                   builder: (BuildContext context, AsyncSnapshot<List<LinhaOperacaoDto>> snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Expanded(child: Center(child: CircularProgressIndicator()));
+                      return const Center(child: CircularProgressIndicator());
                     }
                     if (snapshot.hasError) {
-                      return const Expanded(child: Center(child: Text('Erro ao carregar operacoes')));
+                      return const Center(child: Text('Erro ao carregar operacoes'));
                     }
                     final size = MediaQuery.of(context).size;
                     final operacoes = snapshot.data!;
-                    return Expanded(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: operacoes.length,
-                        itemBuilder: (context, index) {
-                          final operacao = operacoes[index];
-                          return Padding(
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: operacoes.length,
+                            itemBuilder: (context, index) {
+                              final operacao = operacoes[index];
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                    border: Border.all(
+                                      color: Theme.of(context).colorScheme.secondary,
+                                      width: 3,
+                                    ),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Expanded(
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  operacao.produto.nome,
+                                                  textAlign: TextAlign.center,
+                                                  style: const TextStyle(
+                                                    fontSize: 24,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: myDivider(context: context, indent: 0),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          InkWell(
+                                            onTap: () async {
+                                              await _showDialogEditarQuantidade(context: context, linhaOperacaoDto: operacao);
+                                            },
+                                            child: SizedBox(
+                                              width: size.width * 0.2,
+                                              child: Text(
+                                                '${formatarValorMonetario(operacao.quantidade)} ${operacao.produto.medida}',
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                  decoration: TextDecoration.underline,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          myVerticalDivider(size: size),
+                                          SizedBox(
+                                            width: size.width * 0.2,
+                                            child: Text(
+                                              'R\$${formatarValorMonetario(operacao.preco)}',
+                                              textAlign: TextAlign.center,
+                                              style: const TextStyle(
+                                                fontSize: 18,
+                                              ),
+                                            ),
+                                          ),
+                                          myVerticalDivider(size: size),
+                                          InkWell(
+                                            onTap: () async {
+                                              await _showDialogEditarDesconto(context: context, linhaOperacaoDto: operacao);
+                                            },
+                                            child: SizedBox(
+                                              width: size.width * 0.2,
+                                              child: Text(
+                                                'R\$${formatarValorMonetario(operacao.desconto)}',
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                  decoration: TextDecoration.underline,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          myVerticalDivider(size: size),
+                                          SizedBox(
+                                            width: size.width * 0.2,
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                'R\$${formatarValorMonetario(operacao.total)}',
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        // total
+                        SizedBox(
+                          height: 100,
+                          child: Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                             child: Container(
                               decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
                                 border: Border.all(
                                   color: Theme.of(context).colorScheme.secondary,
                                   width: 3,
@@ -180,7 +293,7 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
                               ),
                               child: Column(
                                 children: [
-                                  Row(
+                                  const Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
@@ -189,9 +302,9 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              operacao.produto.nome,
+                                              'Total',
                                               textAlign: TextAlign.center,
-                                              style: const TextStyle(
+                                              style: TextStyle(
                                                 fontSize: 24,
                                               ),
                                             ),
@@ -208,47 +321,27 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
-                                      InkWell(
-                                        onTap: () async {
-                                          await _showDialogEditarQuantidade(context: context, linhaOperacaoDto: operacao);
-                                        },
-                                        child: SizedBox(
-                                          width: size.width * 0.2,
-                                          child: Text(
-                                            '${formatarValorMonetario(operacao.quantidade)} ${operacao.produto.medida}',
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              decoration: TextDecoration.underline,
-                                            ),
-                                          ),
+                                      SizedBox(
+                                        width: size.width * 0.2,
+                                        child: const Text(
+                                          ' ',
+                                        ),
+                                      ),
+                                      myVerticalDivider(size: size),
+                                      SizedBox(
+                                        width: size.width * 0.2,
+                                        child: const Text(
+                                          ' ',
                                         ),
                                       ),
                                       myVerticalDivider(size: size),
                                       SizedBox(
                                         width: size.width * 0.2,
                                         child: Text(
-                                          'R\$${formatarValorMonetario(operacao.preco)}',
+                                          'R\$${formatarValorMonetario(operacoes.fold(0, (total, operacao) => total + operacao.desconto))}',
                                           textAlign: TextAlign.center,
                                           style: const TextStyle(
                                             fontSize: 18,
-                                          ),
-                                        ),
-                                      ),
-                                      myVerticalDivider(size: size),
-                                      InkWell(
-                                        onTap: () async {
-                                          await _showDialogEditarDesconto(context: context, linhaOperacaoDto: operacao);
-                                        },
-                                        child: SizedBox(
-                                          width: size.width * 0.2,
-                                          child: Text(
-                                            'R\$${formatarValorMonetario(operacao.desconto)}',
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              decoration: TextDecoration.underline,
-                                            ),
                                           ),
                                         ),
                                       ),
@@ -258,7 +351,7 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
                                         child: FittedBox(
                                           fit: BoxFit.scaleDown,
                                           child: Text(
-                                            'R\$${formatarValorMonetario(operacao.total)}',
+                                            'R\$${formatarValorMonetario(operacoes.fold(0, (total, operacao) => total + operacao.total))}',
                                             textAlign: TextAlign.center,
                                             style: const TextStyle(
                                               fontSize: 18,
@@ -271,13 +364,15 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
                                 ],
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        )
+                      ],
                     );
                   },
-                );
-              }),
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
