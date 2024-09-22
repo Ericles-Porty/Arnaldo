@@ -2,19 +2,13 @@ import 'package:arnaldo/models/pessoa.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
-class LinhaPessoaOperacoes extends StatefulWidget {
+class LinhaPessoaOperacoes extends StatelessWidget {
   const LinhaPessoaOperacoes({super.key, required this.pessoa});
 
   final Pessoa pessoa;
 
   @override
-  State<LinhaPessoaOperacoes> createState() => _LinhaPessoaOperacoesState();
-}
-
-class _LinhaPessoaOperacoesState extends State<LinhaPessoaOperacoes> {
-  @override
   Widget build(BuildContext context) {
-    final pessoa = widget.pessoa;
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ElevatedButton(
@@ -28,7 +22,7 @@ class _LinhaPessoaOperacoesState extends State<LinhaPessoaOperacoes> {
           ),
         ),
         onPressed: () {
-          Modular.to.pushNamed('/operacoes/cliente', arguments: pessoa);
+          Modular.to.pushNamed('/operacoes/pessoa', arguments: pessoa);
         },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

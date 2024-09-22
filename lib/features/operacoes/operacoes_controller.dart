@@ -1,5 +1,7 @@
 import 'package:arnaldo/core/database/database_helper.dart';
+import 'package:arnaldo/core/enums/operacao_type.dart';
 import 'package:arnaldo/core/enums/pessoa_type.dart';
+import 'package:arnaldo/features/operacoes/dtos/linha_operacao_dto.dart';
 import 'package:arnaldo/models/pessoa.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -13,5 +15,22 @@ class OperacoesController {
   Future<List<Pessoa>> fetchPessoas(PessoaType tipoPessoa) async {
     var db = Modular.get<DatabaseHelper>();
     return await db.getPessoas(tipoPessoa.name);
+  }
+
+  Future<List<LinhaOperacaoDto>> fetchOperacoes(Pessoa pessoa) async {
+    var db = Modular.get<DatabaseHelper>();
+    return await db.getPessoaOperacoes(data: dataSelecionada.value, pessoa: pessoa);
+  }
+
+  Future<int> salvarOperacao(LinhaOperacaoDto linhaOperacaoDto) async {
+    var db = Modular.get<DatabaseHelper>();
+    return await db.insertOperacao(
+      idProduto: linhaOperacaoDto.produto.id,
+      idPessoa: linhaOperacaoDto.pessoa.id,
+      tipoOperacao: linhaOperacaoDto.pessoa.tipo == PessoaType.cliente.name ? OperacaoType.venda.name : OperacaoType.compra.name,
+      quantidade: linhaOperacaoDto.quantidade,
+      desconto: linhaOperacaoDto.desconto,
+      data: dataSelecionada.value,
+    );
   }
 }

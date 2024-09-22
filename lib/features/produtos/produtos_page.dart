@@ -41,13 +41,18 @@ class _ProdutosPageState extends State<ProdutosPage> {
                   onPressed: () {
                     _showDatePicker(context);
                   },
-                  child: Text(
-                    _controller.dataSelecionadaFormatadaPadraoBr,
-                    style: TextStyle(
-                      color: Theme.of(context).primaryColor,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: ValueListenableBuilder(
+                    valueListenable: _controller.dataSelecionada,
+                    builder: (BuildContext context, DateTime value, Widget? child) {
+                      return Text(
+                        _controller.dataSelecionadaFormatadaPadraoBr,
+                        style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -169,7 +174,6 @@ class _ProdutosPageState extends State<ProdutosPage> {
     );
 
     if (picked != null && picked != _controller.dataSelecionada.value) {
-      print('picked: $picked');
       _controller.dataSelecionada.value = picked;
     }
   }

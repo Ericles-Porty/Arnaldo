@@ -1,5 +1,6 @@
 import 'package:arnaldo/core/database/database_helper.dart';
 import 'package:arnaldo/core/enums/produto_historico_type.dart';
+import 'package:arnaldo/core/utils.dart';
 import 'package:arnaldo/models/dtos/linha_produto_dto.dart';
 import 'package:arnaldo/widgets/my_divider.dart';
 import 'package:arnaldo/widgets/my_vertical_divider.dart';
@@ -99,7 +100,7 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                                 alignment: Alignment.centerLeft,
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  'R\$${produto.precoCompra.toStringAsFixed(2)}',
+                                  'R\$${formatarValorMonetario(produto.precoCompra)}',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     decoration: TextDecoration.underline,
@@ -119,7 +120,7 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                                 alignment: Alignment.centerLeft,
                                 fit: BoxFit.scaleDown,
                                 child: Text(
-                                  'R\$${produto.precoVenda.toStringAsFixed(2)}',
+                                  'R\$${formatarValorMonetario(produto.precoVenda)}',
                                   style: const TextStyle(
                                     fontSize: 16,
                                     decoration: TextDecoration.underline,
@@ -149,7 +150,8 @@ class _LinhaProdutoState extends State<LinhaProduto> {
       context: context,
       builder: (BuildContext context) {
         double preco = tipo == ProdutoHistoricoType.compra ? linhaProdutoDto.precoCompra : linhaProdutoDto.precoVenda;
-        TextEditingController textEditingController = TextEditingController(text: preco.toStringAsFixed(2));
+        final textoInicial = formatarValorMonetario(preco);
+        TextEditingController textEditingController = TextEditingController(text: textoInicial);
         return AlertDialog(
           title: Text('Editar preço de ${tipo.name}'),
           content: Column(
@@ -165,7 +167,7 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                 ),
               ),
               Text(
-                'Preço atual: R\$${preco.toStringAsFixed(2)}',
+                'Preço atual: R\$${formatarValorMonetario(preco)}',
                 textAlign: TextAlign.left,
                 style: const TextStyle(
                   fontSize: 16,
