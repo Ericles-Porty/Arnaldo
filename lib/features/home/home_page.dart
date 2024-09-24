@@ -22,50 +22,58 @@ class _HomePageState extends State<HomePage> {
     double size = screenSize.width * 0.3;
     return Scaffold(
       appBar: myAppBar(context: context, title: 'Arnaldo', hasLeading: false),
-      body: SingleChildScrollView(
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Column(
+      body: FutureBuilder(
+        future: widget.db.warmUp(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return SingleChildScrollView(
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 12),
-                Row(
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    BotaoMenu(texto: 'Clientes', icone: Icons.person, rota: '/pessoas/${Rota.clientes.name}', size: size),
-                    const SizedBox(width: 24),
-                    BotaoMenu(texto: 'Fornecedores', icone: Icons.business, rota: '/pessoas/${Rota.fornecedores.name}', size: size),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    BotaoMenu(texto: 'Produtos', icone: Icons.inventory, rota: '/${Rota.produtos.name}/', size: size),
-                    const SizedBox(width: 24),
-                    BotaoMenu(texto: 'Vendas', icone: Icons.attach_money, rota: '/operacoes/pessoas', argumento: PessoaType.cliente, size: size),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    BotaoMenu(texto: 'Compras', icone: Icons.shopping_cart, rota: '/operacoes/pessoas', argumento: PessoaType.fornecedor, size: size),
-                    const SizedBox(width: 24),
-                    BotaoMenu(texto: 'Relatório', icone: Icons.report, rota: '/relatorio/', size: size),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    BotaoMenu(texto: 'Exportar', icone: Icons.file_upload, rota: '/exportar/', size: size),
-                    const SizedBox(width: 24),
-                    BotaoMenu(texto: 'Importar', icone: Icons.file_download, rota: '/importar/', size: size),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        BotaoMenu(texto: 'Clientes', icone: Icons.person, rota: '/pessoas/${Rota.clientes.name}', size: size),
+                        const SizedBox(width: 24),
+                        BotaoMenu(texto: 'Fornecedores', icone: Icons.business, rota: '/pessoas/${Rota.fornecedores.name}', size: size),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        BotaoMenu(texto: 'Produtos', icone: Icons.inventory, rota: '/${Rota.produtos.name}/', size: size),
+                        const SizedBox(width: 24),
+                        BotaoMenu(texto: 'Vendas', icone: Icons.attach_money, rota: '/operacoes/pessoas', argumento: PessoaType.cliente, size: size),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        BotaoMenu(texto: 'Compras', icone: Icons.shopping_cart, rota: '/operacoes/pessoas', argumento: PessoaType.fornecedor, size: size),
+                        const SizedBox(width: 24),
+                        BotaoMenu(texto: 'Relatório', icone: Icons.report, rota: '/relatorio/', size: size),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      children: [
+                        BotaoMenu(texto: 'Exportar', icone: Icons.file_upload, rota: '/exportar/', size: size),
+                        const SizedBox(width: 24),
+                        BotaoMenu(texto: 'Importar', icone: Icons.file_download, rota: '/importar/', size: size),
+                      ],
+                    ),
                   ],
                 ),
               ],
             ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

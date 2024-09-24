@@ -40,10 +40,12 @@ class ExportarPage extends StatelessWidget {
               return ElevatedButton(
                   onPressed: () async {
                     final backupPath = await db.createDatabaseCopy();
-                    print(backupPath);
-                    print('Copiado');
-                    await db.exportDatabase(backupPath);
-                    print('Exportado');
+                    final (isSuccess, message) = await db.exportDatabase(backupPath);
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(message),
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: isSuccess ? Colors.green : Colors.red,
+                    ));
                   },
                   child: const Text('Exportar'));
             }),

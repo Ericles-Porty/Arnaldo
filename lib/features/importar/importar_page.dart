@@ -39,7 +39,12 @@ class ImportarPage extends StatelessWidget {
             builder: (context, snapshot) {
               return ElevatedButton(
                   onPressed: () async {
-                    await db.importDatabase();
+                    final (isSuccess, message) = await db.importDatabase();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      content: Text(message),
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: isSuccess ? Colors.green : Colors.red,
+                    ));
                   },
                   child: const Text('Importar'));
             }),

@@ -26,6 +26,12 @@ class DatabaseHelper {
     return _instance;
   }
 
+  Future<void> warmUp() async {
+    print('Warming up database');
+    await openDatabaseConnection();
+    print('Database warmed up');
+  }
+
   DatabaseHelper._internal();
 
   Future<String> getDatabasePath() async {
@@ -50,55 +56,64 @@ class DatabaseHelper {
 
     final dateNow = DateTime.now();
     final dataFormatada = formatarDataHoraPadraoUs(dateNow);
-    final backupFilePath =
-        '$backupFolderPath/backup_$dataFormatada.db';
+    final backupFilePath = '$backupFolderPath/backup_$dataFormatada.db';
     await dbFile.copy(backupFilePath);
     return backupFilePath;
   }
 
-  Future<void> exportDatabase(String filePath) async {
-    await Share.shareXFiles([XFile(filePath)]);
+  Future<(bool, String)> exportDatabase(String filePath) async {
+    final shareResults = await Share.shareXFiles([XFile(filePath)]);
+    if (shareResults.status == ShareResultStatus.success) return (true, 'Banco de dados exportado com sucesso.');
+    if (shareResults.status == ShareResultStatus.dismissed) return (false, 'Exportação do banco de dados cancelada.');
+    if (shareResults.status == ShareResultStatus.unavailable) return (false, 'Exportação do banco de dados indisponível.');
+    return (false, 'Erro desconhecido ao exportar o banco de dados.');
   }
 
-  Future<void> importDatabase() async {
+  Future<(bool, String)> importDatabase() async {
     final initialDirectory = Directory(backupFolderPath);
-    if (!(await initialDirectory.exists())) throw Exception('Diretório de backup não encontrado.');
+    if (!(await initialDirectory.exists())) return (false, 'Nenhum arquivo de backup encontrado.');
 
+    // Seleciona o arquivo de backup
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       initialDirectory: backupFolderPath,
       type: FileType.any,
     );
 
+    // Verifica se o arquivo foi selecionado
     if (result != null && result.files.single.path != null) {
       final pickedFilePath = result.files.single.path!;
       final pickedFile = File(pickedFilePath);
 
       // Verifica se o arquivo selecionado existe
       if (!await pickedFile.exists()) {
-        throw Exception('Arquivo selecionado não encontrado.');
+        return (false, 'Arquivo selecionado não encontrado.');
       }
 
+      // Verifica se o arquivo selecionado é um arquivo de banco de dados
       if (extension(pickedFilePath) != '.db') {
-        throw Exception('Por favor, selecione um arquivo .db válido.');
+        return (false, 'Arquivo selecionado não é um arquivo de banco de dados.');
       }
 
-      // Obtém o caminho do banco de dados atual
-      final dbPath = await getDatabasePath();
-      final dbFile = File(dbPath);
+      // Copia o arquivo de banco de dados atual para um arquivo de backup
+      await createDatabaseCopy();
 
       // Fechar a conexão com o banco de dados antes de substituir
       await closeDatabaseConnection();
 
       // Substitui o arquivo de banco de dados atual pelo arquivo importado
-      await pickedFile.copy(dbPath);
+      final dbPath = await getDatabasePath();
+      final copiedFile = await pickedFile.copy(dbPath);
+
+      // Substitui o nome do arquivo de banco de importado pelo nome padrão
+      const defaultDbPath = '$backupFolderPath/$_databaseName';
+      await copiedFile.rename(defaultDbPath);
 
       // Reinicializa a conexão com o banco de dados
       await openDatabaseConnection();
 
-      print('Banco de dados importado com sucesso.');
-    } else {
-      print('Nenhum arquivo selecionado.');
+      return (true, 'Banco de dados importado com sucesso.');
     }
+    return (false, 'Nenhum arquivo selecionado.');
   }
 
   Future<void> closeDatabaseConnection() async {
