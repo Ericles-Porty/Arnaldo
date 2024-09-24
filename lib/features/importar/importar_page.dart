@@ -40,6 +40,8 @@ class ImportarPage extends StatelessWidget {
               return ElevatedButton(
                   onPressed: () async {
                     final (isSuccess, message) = await db.importDatabase();
+                    print('isSuccess: $isSuccess');
+                    print('message: $message');
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(message),
                       duration: const Duration(seconds: 3),

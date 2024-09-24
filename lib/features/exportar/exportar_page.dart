@@ -39,8 +39,8 @@ class ExportarPage extends StatelessWidget {
             builder: (context, snapshot) {
               return ElevatedButton(
                   onPressed: () async {
-                    final backupPath = await db.createDatabaseCopy();
-                    final (isSuccess, message) = await db.exportDatabase(backupPath);
+                    final filePath = await db.createDatabaseCopy(isExporting: true);
+                    final (isSuccess, message) = await db.exportDatabase(filePath);
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                       content: Text(message),
                       duration: const Duration(seconds: 3),

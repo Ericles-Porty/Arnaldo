@@ -18,7 +18,9 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static const String _databaseName = 'arnaldo.db';
+  static const String downloadFolderPath = '/storage/emulated/0/Download';
   static const String backupFolderPath = '/storage/emulated/0/Download/arnaldo/backups';
+  static const String exportedFolderPath = '/storage/emulated/0/Download/arnaldo/exported';
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
 
@@ -32,6 +34,10 @@ class DatabaseHelper {
     print('Database warmed up');
   }
 
+  Future<void> fake() async{
+
+  }
+
   DatabaseHelper._internal();
 
   Future<String> getDatabasePath() async {
@@ -40,7 +46,7 @@ class DatabaseHelper {
     return path;
   }
 
-  Future<String> createDatabaseCopy() async {
+  Future<String> createDatabaseCopy({bool isExporting = false}) async {
     final dbPath = await getDatabasePath();
     final dbFile = File(dbPath);
 
@@ -51,14 +57,15 @@ class DatabaseHelper {
     // final backupDirectory = Directory(backupFolderPath);
     // if (!(await backupDirectory.exists())) await backupDirectory.create(recursive: true);
 
-    final backupDirectory = Directory(backupFolderPath);
-    if (!(await backupDirectory.exists())) await backupDirectory.create(recursive: true);
+    final folderPath = isExporting ? exportedFolderPath : backupFolderPath;
+    final copyDirectory = Directory(folderPath);
+    if (!(await copyDirectory.exists())) await copyDirectory.create(recursive: true);
 
     final dateNow = DateTime.now();
     final dataFormatada = formatarDataHoraPadraoUs(dateNow);
-    final backupFilePath = '$backupFolderPath/backup_$dataFormatada.db';
-    await dbFile.copy(backupFilePath);
-    return backupFilePath;
+    final copyFilePath = '$folderPath/backup_$dataFormatada.db';
+    await dbFile.copy(copyFilePath);
+    return copyFilePath;
   }
 
   Future<(bool, String)> exportDatabase(String filePath) async {
@@ -70,12 +77,8 @@ class DatabaseHelper {
   }
 
   Future<(bool, String)> importDatabase() async {
-    final initialDirectory = Directory(backupFolderPath);
-    if (!(await initialDirectory.exists())) return (false, 'Nenhum arquivo de backup encontrado.');
-
     // Seleciona o arquivo de backup
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      initialDirectory: backupFolderPath,
       type: FileType.any,
     );
 
@@ -103,10 +106,6 @@ class DatabaseHelper {
       // Substitui o arquivo de banco de dados atual pelo arquivo importado
       final dbPath = await getDatabasePath();
       final copiedFile = await pickedFile.copy(dbPath);
-
-      // Substitui o nome do arquivo de banco de importado pelo nome padrão
-      const defaultDbPath = '$backupFolderPath/$_databaseName';
-      await copiedFile.rename(defaultDbPath);
 
       // Reinicializa a conexão com o banco de dados
       await openDatabaseConnection();
