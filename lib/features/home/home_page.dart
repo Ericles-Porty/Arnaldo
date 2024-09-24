@@ -54,6 +54,14 @@ class _HomePageState extends State<HomePage> {
                     BotaoMenu(texto: 'Relatório', icone: Icons.report, rota: '/relatorio/', size: size),
                   ],
                 ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    BotaoMenu(texto: 'Exportar', icone: Icons.file_upload, rota: '/exportar/', size: size),
+                    const SizedBox(width: 24),
+                    BotaoMenu(texto: 'Importar', icone: Icons.file_download, rota: '/importar/', size: size),
+                  ],
+                ),
               ],
             ),
           ],

@@ -10,6 +10,7 @@ import 'package:arnaldo/models/operacao.dart';
 import 'package:arnaldo/models/pessoa.dart';
 import 'package:arnaldo/models/produto.dart';
 import 'package:arnaldo/models/produto_historico.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -17,6 +18,7 @@ import 'package:sqflite/sqflite.dart';
 
 class DatabaseHelper {
   static const String _databaseName = 'arnaldo.db';
+  static const String backupFolderPath = '/storage/emulated/0/Download/arnaldo/backups';
   static final DatabaseHelper _instance = DatabaseHelper._internal();
   static Database? _database;
 
@@ -32,16 +34,82 @@ class DatabaseHelper {
     return path;
   }
 
-  Future<void> copyDatabase() async {
+  Future<String> createDatabaseCopy() async {
     final dbPath = await getDatabasePath();
-    final file = File(dbPath);
-    final directory = await getApplicationDocumentsDirectory();
-    final newPath = '${directory.path}/arnaldo/arnaldo_backup.db';
-    await file.copy(newPath);
+    final dbFile = File(dbPath);
+
+    final directory = await getExternalStorageDirectory();
+    if (directory == null) throw Exception('Não foi possível encontrar o diretório de armazenamento externo');
+
+    // final backupFolderPath = '${directory.path}/backups';
+    // final backupDirectory = Directory(backupFolderPath);
+    // if (!(await backupDirectory.exists())) await backupDirectory.create(recursive: true);
+
+    final backupDirectory = Directory(backupFolderPath);
+    if (!(await backupDirectory.exists())) await backupDirectory.create(recursive: true);
+
+    final dateNow = DateTime.now();
+    final dataFormatada = formatarDataHoraPadraoUs(dateNow);
+    final backupFilePath =
+        '$backupFolderPath/backup_$dataFormatada.db';
+    await dbFile.copy(backupFilePath);
+    return backupFilePath;
   }
 
-  Future<void> shareDatabase(String filePath) async {
+  Future<void> exportDatabase(String filePath) async {
     await Share.shareXFiles([XFile(filePath)]);
+  }
+
+  Future<void> importDatabase() async {
+    final initialDirectory = Directory(backupFolderPath);
+    if (!(await initialDirectory.exists())) throw Exception('Diretório de backup não encontrado.');
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      initialDirectory: backupFolderPath,
+      type: FileType.any,
+    );
+
+    if (result != null && result.files.single.path != null) {
+      final pickedFilePath = result.files.single.path!;
+      final pickedFile = File(pickedFilePath);
+
+      // Verifica se o arquivo selecionado existe
+      if (!await pickedFile.exists()) {
+        throw Exception('Arquivo selecionado não encontrado.');
+      }
+
+      if (extension(pickedFilePath) != '.db') {
+        throw Exception('Por favor, selecione um arquivo .db válido.');
+      }
+
+      // Obtém o caminho do banco de dados atual
+      final dbPath = await getDatabasePath();
+      final dbFile = File(dbPath);
+
+      // Fechar a conexão com o banco de dados antes de substituir
+      await closeDatabaseConnection();
+
+      // Substitui o arquivo de banco de dados atual pelo arquivo importado
+      await pickedFile.copy(dbPath);
+
+      // Reinicializa a conexão com o banco de dados
+      await openDatabaseConnection();
+
+      print('Banco de dados importado com sucesso.');
+    } else {
+      print('Nenhum arquivo selecionado.');
+    }
+  }
+
+  Future<void> closeDatabaseConnection() async {
+    if (_database != null) {
+      await _database!.close();
+      _database = null;
+    }
+  }
+
+  Future<void> openDatabaseConnection() async {
+    _database ??= await _initDatabase();
   }
 
   Future<Database> get database async {
@@ -62,16 +130,6 @@ class DatabaseHelper {
 
   Future<void> _onOpen(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
-
-    // await db.execute('''
-    // INSERT INTO produto_historico (id_produto, tipo, preco, data)
-    // SELECT id, 'compra' , 50.0, '2024-09-06' FROM produto;
-    // ''');
-    //
-    // await db.execute('''
-    // INSERT INTO produto_historico (id_produto, tipo, preco, data)
-    // SELECT id, 'venda' , 100.0, '2024-09-06' FROM produto;
-    // ''');
   }
 
   Future<void> _onCreate(Database db, int version) async {
