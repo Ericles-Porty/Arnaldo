@@ -1,9 +1,9 @@
 import 'package:sqflite/sqflite.dart';
 
 Future<void> databaseSeed(Database db, int version) async {
-  await db.insert('produto', {'nome': 'Pimenta de cheiro', 'medida': 'kg'});
+  await db.insert('produto', {'nome': 'Pimenta de cheiro', 'medida': 'saco'});
+  await db.insert('produto', {'nome': 'Pimenta doce', 'medida': 'saco'});
   await db.insert('produto', {'nome': 'Pimenta-malagueta', 'medida': 'kg'});
-  await db.insert('produto', {'nome': 'Pimenta doce', 'medida': 'kg'});
   await db.insert('produto', {'nome': 'Pimenta dedo de moça', 'medida': 'kg'});
   await db.insert('produto', {'nome': 'Pimenta chocolate', 'medida': 'kg'});
   await db.insert('produto', {'nome': 'Pimenta carolina reaper', 'medida': 'kg'});

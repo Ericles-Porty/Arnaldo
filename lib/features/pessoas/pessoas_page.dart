@@ -51,7 +51,7 @@ class _PessoasPageState extends State<PessoasPage> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         'Adicionar ${widget.pessoaType.name}',
-                        style: const TextStyle(fontSize: 24),
+                        style: const TextStyle(fontSize: 36),
                       ),
                     ),
                     onPressed: () async {
@@ -85,31 +85,42 @@ class _PessoasPageState extends State<PessoasPage> {
       builder: (BuildContext context) {
         final TextEditingController controller = TextEditingController();
         return AlertDialog(
-          title: Text('Adicionar ${widget.pessoaType.name}'),
+          icon: const Icon(
+            Icons.person_add,
+            size: 42,
+          ),
+          title: Text('Adicionar ${widget.pessoaType.name}', style: const TextStyle(fontSize: 36)),
           content: TextField(
+            style: const TextStyle(fontSize: 24),
             controller: controller,
-            decoration: const InputDecoration(labelText: 'Nome'),
+            decoration: const InputDecoration(
+              labelText: 'Nome',
+              constraints: BoxConstraints(minHeight: 64),
+              labelStyle: TextStyle(fontSize: 32),
+            ),
             textCapitalization: TextCapitalization.words,
             keyboardType: TextInputType.text,
             autofocus: true,
           ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Salvar'),
-              onPressed: () async {
-                if (controller.text.isNotEmpty) {
-                  final db = Modular.get<DatabaseHelper>();
-                  await db.insertPessoa(controller.text, widget.pessoaType.name);
-                }
-                Navigator.of(context).pop();
-              },
-            ),
+            Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+              TextButton(
+                child: const Text('Cancelar', style: TextStyle(fontSize: 24, color: Colors.red)),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+              ElevatedButton(
+                child: const Text('Salvar', style: TextStyle(fontSize: 32)),
+                onPressed: () async {
+                  if (controller.text.isNotEmpty) {
+                    final db = Modular.get<DatabaseHelper>();
+                    await db.insertPessoa(controller.text, widget.pessoaType.name);
+                  }
+                  Navigator.of(context).pop();
+                },
+              ),
+            ]),
           ],
         );
       },

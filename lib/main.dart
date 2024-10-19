@@ -4,6 +4,7 @@ import 'package:arnaldo/app_module.dart';
 import 'package:arnaldo/app_widget.dart';
 import 'package:arnaldo/core/database/database_helper.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -22,6 +23,10 @@ void main() async {
   print('getDatabasesPath: ');
   print(await getDatabasesPath());
   await DatabaseHelper().warmUp();
+
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+
 
   //await resetDatabase();
 

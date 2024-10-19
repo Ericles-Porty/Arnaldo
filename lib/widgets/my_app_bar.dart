@@ -10,7 +10,7 @@ AppBar myAppBar({
     iconTheme: const IconThemeData(color: Colors.white),
     title: Padding(
       padding: const EdgeInsets.only(right: 16),
-      child: FittedBox(child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 26))),
+      child: FittedBox(child: Text(title, style: const TextStyle(color: Colors.white, fontSize: 36))),
     ),
     titleSpacing: hasLeading ? 0 : NavigationToolbar.kMiddleSpacing,
     elevation: 0,

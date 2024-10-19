@@ -34,9 +34,7 @@ class DatabaseHelper {
     print('Database warmed up');
   }
 
-  Future<void> fake() async{
-
-  }
+  Future<void> fake() async {}
 
   DatabaseHelper._internal();
 
@@ -302,6 +300,35 @@ class DatabaseHelper {
     return produtosPrecos.values.toList();
   }
 
+  // Retorna o Id e nome dos produtos que não possuem operação na data informada
+  Future<List<Produto>> getProdutosSemOperacao({required Pessoa pessoa, required DateTime data}) async {
+    final db = await database;
+
+    final produtosResponse = await getProdutos();
+
+    List<Produto> produtos = [];
+
+    final response = await db.rawQuery('''
+      SELECT 
+        PR.id as id_produto,
+        PR.nome as nome_produto,
+        pr.medida as medida_produto
+      FROM operacao AS O
+      JOIN produto_historico AS PH ON PH.id = O.id_produto_historico
+      JOIN produto AS PR ON PR.id = PH.id_produto
+      JOIN pessoa AS P ON P.id = O.id_pessoa
+      WHERE O.id_pessoa = ? AND O.data = ?
+    ''', [pessoa.id, formatarDataPadraoUs(data)]);
+
+    for (var produto in produtosResponse) {
+      if (response.indexWhere((element) => element['nome_produto'] == produto.nome) == -1) {
+        produtos.add(Produto(id: produto.id, nome: produto.nome, medida: produto.medida));
+      }
+    }
+
+    return produtos;
+  }
+
   Future<ProdutoHistorico> getProdutoHistorico({required int idProduto, DateTime? data}) async {
     final db = await database;
 
@@ -371,6 +398,7 @@ class DatabaseHelper {
       SELECT 
         O.quantidade as quantidade,
         O.desconto as desconto,
+        O.comentario as comentario,
         PR.id as id_produto,
         PR.nome as nome_produto,
         PR.medida as medida_produto,
@@ -389,8 +417,51 @@ class DatabaseHelper {
         preco: operacoes[index].preco,
         desconto: operacao['desconto'] as double,
         total: operacoes[index].preco * (operacao['quantidade'] as double) - (operacao['desconto'] as double),
+        comentario: operacao['comentario'] as String?,
       );
     }
+    return operacoes;
+  }
+
+  // Na v2 vamos buscar apenas pelas operacoes que ja existem
+  Future<List<LinhaOperacaoDto>> getPessoaOperacoesV2({required DateTime data, required Pessoa pessoa}) async {
+    final db = await database;
+
+    final produtosResponse = await getProdutos();
+    final produtosPrecosResponse = await getProdutosPrecos(data);
+
+    final response = await db.rawQuery('''
+      SELECT 
+        O.id as id,
+        O.quantidade as quantidade,
+        O.desconto as desconto,
+        O.comentario as comentario,
+        PR.id as id_produto,
+        PR.nome as nome_produto,
+        PR.medida as medida_produto,
+        P.nome as nome_pessoa
+      FROM operacao AS O
+      JOIN produto_historico AS PH ON PH.id = O.id_produto_historico
+      JOIN produto AS PR ON PR.id = PH.id_produto
+      JOIN pessoa AS P ON P.id = O.id_pessoa
+      WHERE O.id_pessoa = ? AND O.data = ?
+    ''', [pessoa.id, formatarDataPadraoUs(data)]);
+
+    final operacoes = response.map((operacao) {
+      final produto = produtosResponse.firstWhere((element) => element.id == operacao['id_produto']);
+      final precoProduto = produtosPrecosResponse.firstWhere((element) => element.idProduto == produto.id);
+      final preco = pessoa.tipo == PessoaType.cliente.name ?  precoProduto.precoVenda : precoProduto.precoCompra;
+      return LinhaOperacaoDto(
+        produto: produto,
+        pessoa: pessoa,
+        quantidade: operacao['quantidade'] as double,
+        preco: preco,
+        desconto: operacao['desconto'] as double,
+        total: 0,
+        comentario: operacao['comentario'] as String?,
+      );
+    }).toList();
+
     return operacoes;
   }
 
@@ -441,6 +512,7 @@ class DatabaseHelper {
     required double quantidade,
     required DateTime data,
     double desconto = 0,
+    String? comentario,
   }) async {
     final db = await database;
 
@@ -472,6 +544,7 @@ class DatabaseHelper {
           {
             'quantidade': quantidade,
             'desconto': desconto,
+            'comentario': comentario,
           },
           where: 'id = ?',
           whereArgs: [operacaoResponse.first['id']]);

@@ -48,7 +48,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                         _controller.dataSelecionadaFormatadaPadraoBr,
                         style: TextStyle(
                           color: Theme.of(context).primaryColor,
-                          fontSize: 20,
+                          fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
                       );
@@ -80,7 +80,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                               child: Text(
                                 'Produto',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 32,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -97,7 +97,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                                   child: const Text(
                                     'Preço compra',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 30,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -108,7 +108,7 @@ class _ProdutosPageState extends State<ProdutosPage> {
                                   child: const Text(
                                     'Preço venda',
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: 30,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),

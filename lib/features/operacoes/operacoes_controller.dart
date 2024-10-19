@@ -3,11 +3,14 @@ import 'package:arnaldo/core/enums/operacao_type.dart';
 import 'package:arnaldo/core/enums/pessoa_type.dart';
 import 'package:arnaldo/features/operacoes/dtos/linha_operacao_dto.dart';
 import 'package:arnaldo/models/pessoa.dart';
+import 'package:arnaldo/models/produto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 
 class OperacoesController {
   final ValueNotifier<DateTime> dataSelecionada = ValueNotifier<DateTime>(DateTime.now());
+
+  List<Produto> produtosSemOperacao = [];
 
   String get dataSelecionadaFormatadaPadraoBr =>
       '${dataSelecionada.value.day.toString().padLeft(2, '0')}/${dataSelecionada.value.month.toString().padLeft(2, '0')}/${dataSelecionada.value.year}';
@@ -22,6 +25,12 @@ class OperacoesController {
     return await db.getPessoaOperacoes(data: dataSelecionada.value, pessoa: pessoa);
   }
 
+  Future<List<LinhaOperacaoDto>> fetchOperacoesV2(Pessoa pessoa) async {
+    var db = Modular.get<DatabaseHelper>();
+    await fetchProdutosSemOperacao(pessoa: pessoa, data: dataSelecionada.value);
+    return await db.getPessoaOperacoesV2(data: dataSelecionada.value, pessoa: pessoa);
+  }
+
   Future<int> salvarOperacao(LinhaOperacaoDto linhaOperacaoDto) async {
     var db = Modular.get<DatabaseHelper>();
     return await db.insertOperacao(
@@ -31,6 +40,14 @@ class OperacoesController {
       quantidade: linhaOperacaoDto.quantidade,
       desconto: linhaOperacaoDto.desconto,
       data: dataSelecionada.value,
+      comentario: linhaOperacaoDto.comentario,
     );
+  }
+
+  // Retorna a lista com id e nome dos produtos que não tiveram operações na data selecionada para a pessoa informada
+  Future<List<Produto>> fetchProdutosSemOperacao({required Pessoa pessoa, required DateTime data}) async {
+    var db = Modular.get<DatabaseHelper>();
+    produtosSemOperacao = await db.getProdutosSemOperacao(data: dataSelecionada.value, pessoa: pessoa);
+    return produtosSemOperacao;
   }
 }

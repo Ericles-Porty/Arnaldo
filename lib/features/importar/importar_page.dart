@@ -48,7 +48,10 @@ class ImportarPage extends StatelessWidget {
                       backgroundColor: isSuccess ? Colors.green : Colors.red,
                     ));
                   },
-                  child: const Text('Importar'));
+                  child: Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: const Text('Importar', style: TextStyle(fontSize: 120)),
+                  ));
             }),
       ),
     );

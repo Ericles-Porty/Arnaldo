@@ -129,30 +129,35 @@ class _LinhaPessoaState extends State<LinhaPessoa> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Apagar ${pessoa.tipo} ${pessoa.nome}'),
-          content: Text('Deseja realmente apagar o ${pessoa.tipo} ${pessoa.nome}?'),
+          title: Text('Apagar ${pessoa.tipo} ${pessoa.nome}', style: const TextStyle(fontSize: 36)),
+          content: Text('Deseja realmente apagar o ${pessoa.tipo} ${pessoa.nome}?', style: const TextStyle(fontSize: 24)),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Apagar'),
-              onPressed: () async {
-                final db = Modular.get<DatabaseHelper>();
-                await db.deletePessoa(pessoa.id);
-                Navigator.of(context).pop();
-                Rota rota = pessoa.tipo == PessoaType.cliente.name
-                    ? Rota.clientes
-                    : pessoa.tipo == PessoaType.fornecedor.name
-                        ? Rota.fornecedores
-                        : Rota.home;
-                Modular.to.pop();
-                Modular.to.pushNamed('/pessoas/${rota.name}');
-              },
-            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                  child: const Text('Cancelar', style: TextStyle(color: Colors.red, fontSize: 24)),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('Apagar', style: TextStyle(fontSize: 32)),
+                  onPressed: () async {
+                    final db = Modular.get<DatabaseHelper>();
+                    await db.deletePessoa(pessoa.id);
+                    Navigator.of(context).pop();
+                    Rota rota = pessoa.tipo == PessoaType.cliente.name
+                        ? Rota.clientes
+                        : pessoa.tipo == PessoaType.fornecedor.name
+                            ? Rota.fornecedores
+                            : Rota.home;
+                    Modular.to.pop();
+                    Modular.to.pushNamed('/pessoas/${rota.name}');
+                  },
+                ),
+              ],
+            )
           ],
         );
       },
@@ -165,27 +170,33 @@ class _LinhaPessoaState extends State<LinhaPessoa> {
       builder: (BuildContext context) {
         final TextEditingController textController = TextEditingController(text: pessoa.nome);
         return AlertDialog(
-          title: Text('Editar ${pessoa.tipo} ${pessoa.nome}'),
+          title: Text('Editar ${pessoa.tipo} ${pessoa.nome}', style: const TextStyle(fontSize: 36)),
           content: TextField(
+            style: const TextStyle(fontSize: 24),
             controller: textController,
             decoration: const InputDecoration(labelText: 'Nome'),
           ),
           actions: <Widget>[
-            TextButton(
-              child: const Text('Cancelar'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: const Text('Salvar'),
-              onPressed: () async {
-                final db = Modular.get<DatabaseHelper>();
-                await db.updatePessoa(pessoa.id, textController.text);
-                await controller.fetchPessoa();
-                Navigator.of(context).pop();
-              },
-            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                TextButton(
+                  child: const Text('Cancelar', style: TextStyle(color: Colors.red, fontSize: 24)),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                ElevatedButton(
+                  child: const Text('Salvar', style: TextStyle(fontSize: 32)),
+                  onPressed: () async {
+                    final db = Modular.get<DatabaseHelper>();
+                    await db.updatePessoa(pessoa.id, textController.text);
+                    await controller.fetchPessoa();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            )
           ],
         );
       },

@@ -8,6 +8,7 @@ class LinhaOperacaoDto {
   final double preco;
   final double desconto;
   final double total;
+  final String? comentario;
 
   LinhaOperacaoDto({
     required this.produto,
@@ -16,6 +17,7 @@ class LinhaOperacaoDto {
     required this.preco,
     required this.desconto,
     required this.total,
+    this.comentario,
   });
 
   factory LinhaOperacaoDto.fromMap(Map<String, dynamic> map) {
@@ -26,6 +28,7 @@ class LinhaOperacaoDto {
       preco: map['preco'],
       desconto: map['desconto'],
       total: map['total'],
+      comentario: map['comentario'],
     );
   }
 
@@ -42,6 +45,7 @@ class LinhaOperacaoDto {
       'preco': preco,
       'desconto': desconto,
       'total': total,
+      'comentario': comentario,
     };
   }
 
@@ -52,6 +56,7 @@ class LinhaOperacaoDto {
     double? preco,
     double? desconto,
     double? total,
+    String? comentario,
   }) {
     return LinhaOperacaoDto(
       produto: produto ?? this.produto,
@@ -60,6 +65,7 @@ class LinhaOperacaoDto {
       preco: preco ?? this.preco,
       desconto: desconto ?? this.desconto,
       total: total ?? this.total,
+      comentario: comentario ?? this.comentario,
     );
   }
 }

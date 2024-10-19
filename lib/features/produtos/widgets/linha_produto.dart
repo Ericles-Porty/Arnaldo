@@ -77,7 +77,7 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                           child: Text(
                             produto.nome,
                             style: const TextStyle(
-                              fontSize: 20,
+                              fontSize: 32,
                               fontWeight: FontWeight.normal,
                             ),
                           ),
@@ -102,7 +102,7 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                                 child: Text(
                                   'R\$${formatarValorMonetario(produto.precoCompra)}',
                                   style: const TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 32,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),
@@ -122,7 +122,7 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                                 child: Text(
                                   'R\$${formatarValorMonetario(produto.precoVenda)}',
                                   style: const TextStyle(
-                                    fontSize: 16,
+                                    fontSize: 32,
                                     decoration: TextDecoration.underline,
                                   ),
                                 ),

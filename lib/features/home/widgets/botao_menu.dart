@@ -34,7 +34,7 @@ class _BotaoMenuState extends State<BotaoMenu> {
         ),
       ),
       child: SizedBox(
-        width: widget.size,
+        width: widget.size * 1.5,
         height: widget.size,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

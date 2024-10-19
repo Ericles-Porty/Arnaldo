@@ -47,7 +47,13 @@ class ExportarPage extends StatelessWidget {
                       backgroundColor: isSuccess ? Colors.green : Colors.red,
                     ));
                   },
-                  child: const Text('Exportar'));
+                  child: const Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: Text(
+                      'Exportar',
+                      style: TextStyle(fontSize: 120),
+                    ),
+                  ));
             }),
       ),
     );
