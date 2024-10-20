@@ -174,6 +174,7 @@ class DatabaseHelper {
 
   Future<int> deletePessoa(int id) async {
     final db = await database;
+    // await db.delete('operacao', where: 'id_pessoa = ?', whereArgs: [id]);
     return await db.delete('pessoa', where: 'id = ?', whereArgs: [id]);
   }
 
@@ -457,7 +458,7 @@ class DatabaseHelper {
         quantidade: operacao['quantidade'] as double,
         preco: preco,
         desconto: operacao['desconto'] as double,
-        total: 0,
+        total: preco * (operacao['quantidade'] as double) - (operacao['desconto'] as double),
         comentario: operacao['comentario'] as String?,
       );
     }).toList();

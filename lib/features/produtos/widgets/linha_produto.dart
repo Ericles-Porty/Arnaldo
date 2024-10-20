@@ -153,7 +153,7 @@ class _LinhaProdutoState extends State<LinhaProduto> {
         final textoInicial = formatarValorMonetario(preco);
         TextEditingController textEditingController = TextEditingController(text: textoInicial);
         return AlertDialog(
-          title: Text('Editar preço de ${tipo.name}'),
+          title: Text('Editar preço de ${tipo.name}', style: const TextStyle(fontSize: 32)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,41 +163,47 @@ class _LinhaProdutoState extends State<LinhaProduto> {
                 'Produto: ${linhaProdutoDto.nome}',
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 26,
                 ),
               ),
               Text(
                 'Preço atual: R\$${formatarValorMonetario(preco)}',
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                  fontSize: 16,
+                  fontSize: 20,
                 ),
               ),
               const SizedBox(height: 8),
               TextField(
+                style: const TextStyle(fontSize: 24),
                 controller: textEditingController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
                   hintText: 'Digite o novo preço',
-                  label: Text('Novo preço'),
+                  label: Text('Novo preço', style: TextStyle(fontSize: 24)),
                 ),
               ),
             ],
           ),
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancelar'),
-            ),
-            TextButton(
-              onPressed: () async {
-                await _controller.editarPrecoProduto(idProduto: linhaProdutoDto.idProduto, tipo: tipo, preco: double.parse(textEditingController.text));
-                await _controller.fetchProdutoPreco();
-                Navigator.of(context).pop();
-              },
-              child: const Text('Salvar'),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Cancelar', style: TextStyle(fontSize: 24, color: Colors.red)),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _controller.editarPrecoProduto(idProduto: linhaProdutoDto.idProduto, tipo: tipo, preco: double.parse(textEditingController.text));
+                    await _controller.fetchProdutoPreco();
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Salvar', style: TextStyle(fontSize: 32)),
+                ),
+              ],
             ),
           ],
         );

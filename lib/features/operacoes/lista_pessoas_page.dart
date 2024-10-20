@@ -26,6 +26,14 @@ class ListaPessoasPage extends StatelessWidget {
             return Center(child: Text('Erro: ${snapshot.error}'));
           } else {
             final List<Pessoa> pessoas = snapshot.data as List<Pessoa>;
+            if (pessoas.isEmpty) {
+              return Center(
+                child: Text(
+                  'Nenhum ${tipoPessoa == PessoaType.cliente ? 'cliente' : 'fornecedor'} cadastrado.',
+                  style: const TextStyle(fontSize: 42, color: Colors.grey),
+                ),
+              );
+            }
             return ListView.builder(
               itemCount: pessoas.length,
               itemBuilder: (context, index) {

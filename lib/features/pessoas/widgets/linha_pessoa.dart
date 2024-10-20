@@ -180,7 +180,7 @@ class _LinhaPessoaState extends State<LinhaPessoa> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                TextButton(
+                ElevatedButton(
                   child: const Text('Cancelar', style: TextStyle(color: Colors.red, fontSize: 24)),
                   onPressed: () {
                     Navigator.of(context).pop();

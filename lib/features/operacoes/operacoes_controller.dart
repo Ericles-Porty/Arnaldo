@@ -33,6 +33,7 @@ class OperacoesController {
 
   Future<int> salvarOperacao(LinhaOperacaoDto linhaOperacaoDto) async {
     var db = Modular.get<DatabaseHelper>();
+
     return await db.insertOperacao(
       idProduto: linhaOperacaoDto.produto.id,
       idPessoa: linhaOperacaoDto.pessoa.id,

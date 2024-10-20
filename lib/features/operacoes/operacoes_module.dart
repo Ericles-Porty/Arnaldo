@@ -1,6 +1,5 @@
 import 'package:arnaldo/core/enums/pessoa_type.dart';
 import 'package:arnaldo/features/operacoes/operacoes_controller.dart';
-import 'package:arnaldo/features/operacoes/operacoes_page.dart';
 import 'package:arnaldo/features/operacoes/lista_operacoes_pessoa_page.dart';
 import 'package:arnaldo/features/operacoes/lista_pessoas_page.dart';
 import 'package:arnaldo/models/pessoa.dart';
@@ -14,7 +13,6 @@ class OperacoesModule extends Module {
 
   @override
   void routes(r) {
-    // r.child('/', child: (context) => OperacoesPage(tipoPessoa: r.args.data as PessoaType));
     r.child('/pessoas', child: (context) => ListaPessoasPage(tipoPessoa: r.args.data as PessoaType));
     r.child('/pessoa', child: (context) => ListaOperacoesPessoaPage(pessoa: r.args.data as Pessoa));
   }

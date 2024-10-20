@@ -518,7 +518,7 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                TextButton(
+                ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -617,14 +617,14 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
                 'Pessoa: ${linhaOperacaoDto.pessoa.nome}',
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                  fontSize: 27,
+                  fontSize: 26,
                 ),
               ),
               Text(
                 'Produto: ${linhaOperacaoDto.produto.nome}',
                 textAlign: TextAlign.left,
                 style: const TextStyle(
-                  fontSize: 27,
+                  fontSize: 26,
                 ),
               ),
               Text(
@@ -649,13 +649,13 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
           actions: [
             Row(
               children: [
-                TextButton(
+                ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
                   child: const Text('Cancelar', style: TextStyle(fontSize: 24, color: Colors.red)),
                 ),
-                TextButton(
+                ElevatedButton(
                   onPressed: () async {
                     await _controller.salvarOperacao(linhaOperacaoDto.copyWith(
                       quantidade: double.parse(textEditingController.text),
@@ -726,7 +726,7 @@ class _ListaOperacoesPessoaPageState extends State<ListaOperacoesPessoaPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                TextButton(
+                ElevatedButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },

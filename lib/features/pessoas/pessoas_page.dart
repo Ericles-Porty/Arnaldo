@@ -104,7 +104,7 @@ class _PessoasPageState extends State<PessoasPage> {
           ),
           actions: <Widget>[
             Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-              TextButton(
+              ElevatedButton(
                 child: const Text('Cancelar', style: TextStyle(fontSize: 24, color: Colors.red)),
                 onPressed: () {
                   Navigator.of(context).pop();
